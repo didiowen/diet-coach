@@ -3,7 +3,7 @@ name: diet-coach
 description: Estimates calories and macros for food (Taiwanese cuisine, restaurants, convenience store, home-cooked, packaged) from photos or descriptions. Outputs structured data ready to append to diet_log.csv. Triggered when user sends a food photo, describes a meal, or asks for nutrition estimation.
 ---
 
-# Ines 食物估算工具
+# 飲食教練
 
 ## 語言
 
