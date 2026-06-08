@@ -166,6 +166,50 @@ description: Estimates calories and macros for food (Taiwanese cuisine, restaura
 ### 不需確認直接存入
 讀到營養標示就直接寫入，不需問使用者，完成後告知已記錄。
 
+## 體重追蹤
+
+### 檔案
+- weight_log.csv：`~/diet-coach/weight_log.csv`（或自訂）
+- 欄位：`date,weight_kg,body_fat_pct,notes`（body_fat_pct 可留空）
+
+### 提醒機制
+每次食物記錄後，讀取 weight_log.csv 最後一筆日期：
+- 無資料或距今 ≥ 14 天 → 在回覆末尾附加：「距上次量體重已超過兩週，記得回報體重和體脂哦！」
+- 距今 < 14 天 → 不提及（靜默）
+
+### 偵測體重回報
+使用者傳送含體重或體脂的訊息（例：「體重 54.5」、「體脂 22%」、「54.8kg，體脂21」）時，觸發重算流程。
+
+### 重算流程
+1. 帶入 Mifflin-St Jeor：
+   - 女：`BMR = 10×體重 + 6.25×身高 − 5×年齡 − 161`
+   - 男：`BMR = 10×體重 + 6.25×身高 − 5×年齡 + 5`
+   - 若使用者檔案缺少身高或年齡，先詢問一次，之後不再問
+2. 套用 PAL（以現行訓練頻率為準）得出 TDEE
+3. 依當前目標（減脂/增肌/維持）計算訓練日/休息日目標：
+   - 減脂：熱量赤字 15–20%；蛋白質 2.0–2.2 g/kg；脂肪下限 0.8 g/kg
+   - 增肌：熱量盈餘 5–10%；蛋白質 1.8–2.0 g/kg
+   - 維持：TDEE ±5%；蛋白質 1.6–2.0 g/kg
+4. 顯示確認摘要，**等使用者回覆「確認」後才寫入**
+
+### 確認摘要格式
+```
+體重更新：X.X kg（前次 Y.Y kg，差 ±Z.Z）
+體脂：N%（如有）
+BMR：XXX kcal｜TDEE：XXX kcal
+
+建議更新後目標：
+訓練日：熱量 XXXX｜P XX-XX g｜C XX-XX g｜F XX-XX g
+休息日：熱量 XXXX｜P XX-XX g｜C XX-XX g｜F XX-XX g
+
+回覆「確認」即更新目標並寫入。
+```
+
+### 確認後動作
+1. Append 新條目到 weight_log.csv
+2. 更新 SKILL.md「營養目標」區塊數值，並在標題後標記版本日期（例：`版本 2026-06-22`）
+3. `git add weight_log.csv` + SKILL.md → commit → push（同一 commit）
+
 ## 不處理的議題
 
 - 訓練計畫、損傷、補充品（飲食類除外）
