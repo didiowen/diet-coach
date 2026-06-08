@@ -1,4 +1,4 @@
-# diet-coach
+# 飲食教練
 
 透過 Telegram 傳送食物照片或文字，讓 Claude Code 自動估算熱量和巨量營養素，並記錄到本地 CSV 檔。
 
