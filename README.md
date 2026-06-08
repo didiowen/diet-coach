@@ -40,11 +40,59 @@ food_name, source, serving_size_g, calories, protein_g, carb_g, fat_g, notes
 ## 安裝步驟
 
 1. 將 `SKILL.md` 放到 `~/.claude/skills/diet-coach/SKILL.md`
-2. 修改 `SKILL.md` 中的使用者背景與營養目標
-3. 建立個人資料目錄（例如 `~/diet-coach/` 或放在私有 repo 中）
-4. 將 `diet_log.csv`、`food_reference.csv` 模板複製到該目錄
-5. 透過 [claude-plugins-official](https://github.com/claude-plugins-official) 將 Claude Code 連接 Telegram
-6. 傳送食物照片或描述，Claude 自動處理
+2. 建立個人資料目錄（例如私有 git repo）
+3. 將 `diet_log.csv`、`food_reference.csv` 模板複製到該目錄，並在 `SKILL.md` 更新路徑
+4. 設定 Telegram（見下方教學）
+5. 傳送食物照片或描述，Claude 自動處理
+
+## Telegram 設置
+
+> 完整教學：[Claude Code Telegram 快速設置](https://abmedia.io/claude-code-telegram-quick-setup)
+
+### 前置需求
+
+- 已安裝 Claude Code（`claude` 指令可執行）
+- 已安裝 [Bun](https://bun.sh)：`curl -fsSL https://bun.sh/install | bash`
+
+### 設置步驟
+
+**Step 1 — 建立 Telegram Bot**
+
+在 Telegram 搜尋 `@BotFather`，輸入 `/newbot`，依提示建立 Bot 並取得 Token（格式：`123456789:AAHfiqks...`）。
+
+**Step 2 — 安裝插件**
+
+進入 Claude Code session，執行：
+```
+/plugin install telegram@claude-plugins-official
+/reload-plugins
+```
+
+**Step 3 — 設定 Token**
+
+```
+/telegram:configure 你的_BOT_TOKEN
+```
+
+**Step 4 — 以 Channels 模式重啟**
+
+```bash
+claude --channels plugin:telegram@claude-plugins-official
+```
+
+> 注意：必須加 `--channels` 參數，Bot 才會上線；單獨執行 `claude` 不會收到訊息。
+
+**Step 5 — 配對**
+
+1. 在 Telegram 傳任意訊息給 Bot → 收到 6 字元配對碼
+2. 回到 Claude Code session，執行：`/telegram:access pair <配對碼>`
+3. 確認提示選 **Yes**
+
+**Step 6 — 鎖定存取**
+
+```
+/telegram:access policy allowlist
+```
 
 ## BMR / TDEE 計算方式
 
