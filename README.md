@@ -46,12 +46,34 @@ food_name, source, serving_size_g, calories, protein_g, carb_g, fat_g, notes
 5. 透過 [claude-plugins-official](https://github.com/claude-plugins-official) 將 Claude Code 連接 Telegram
 6. 傳送食物照片或描述，Claude 自動處理
 
+## BMR / TDEE 計算方式
+
+`SKILL.md` 在初始設定時會詢問使用者資料，並以 **Mifflin-St Jeor（1990）** 公式計算基礎代謝率（BMR）：
+
+| 性別 | 公式 |
+|------|------|
+| 男 | BMR = 10 × 體重(kg) + 6.25 × 身高(cm) − 5 × 年齡 + 5 |
+| 女 | BMR = 10 × 體重(kg) + 6.25 × 身高(cm) − 5 × 年齡 − 161 |
+
+再乘上活動係數（PAL）得出 **TDEE（每日總熱量消耗）**：
+
+| 活動量 | PAL |
+|--------|-----|
+| 幾乎不動 | 1.20 |
+| 輕度活動（1–3次/週） | 1.375 |
+| 中度活動（3–5次/週） | 1.55 |
+| 重度活動（6–7次/週） | 1.725 |
+| 極重度活動 | 1.90 |
+
+依目標調整熱量：減脂 TDEE × 0.80–0.85、增肌 TDEE × 1.05–1.10、維持 TDEE。
+
+> 可用 [王介立醫師臨床計算器](https://copper0722.com.tw/calculator/topic/body-size-energy/) 驗算。
+
 ## 個人化設定
 
 在 `SKILL.md` 中調整以下區塊：
 
-- **使用者背景**：體重、飲食偏好、所在地
-- **營養目標**：訓練日 / 休息日的熱量、蛋白質、碳水、脂肪目標
+- **初始設定**：首次使用時 Claude 會詢問基本資料，自動計算 BMR/TDEE 並設定目標
 - **NG食物管理**：定義哪些食物算 NG、每週限制次數、超標時的回應風格
 
 ## 注意事項
