@@ -134,5 +134,5 @@ claude --channels plugin:telegram@claude-plugins-official
 
 - 估算值誤差約 ±15–20%，外食尤其如此
 - 此 repo 為公開模板，不含個人飲食記錄
-- `diet_log.csv` 實際內容建議放私有 repo 或 google drive
+- `diet_log.csv`、`weight_log.csv` 實際內容含個人健康資料，建議放私有 repo 或 Google Drive
 - 歡迎共同維護`food_reference.csv`
