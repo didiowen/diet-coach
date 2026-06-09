@@ -178,7 +178,21 @@ grep "^$(date +%Y-%m-%d)" <path-to>/diet_log.csv
 2. 無 reference → 依估算原則推算，標註誤差
 
 ### 不需確認直接存入
-讀到營養標示就直接寫入，不需問使用者，完成後告知已記錄。
+
+讀到營養標示就**呼叫 helper script 寫入**（多人共用 bot 時 race-free），不需問使用者，完成後告知已記錄：
+
+```sh
+python3 <path-to>/food-ref-append.py \
+  --food-name "<品名>" --source "<品牌/來源>" --serving-size-g <num> \
+  --calories <num> --protein-g <num> --carb-g <num> --fat-g <num> \
+  --notes "<備註>"
+```
+
+腳本內含 `fcntl.flock` 序列化 + `(food_name, source)` dedupe。並發呼叫安全、重複品項自動 skip。
+
+參考實作：本 repo 的 `food-ref-append.py`（或設置 single-user 時可省略，直接 append CSV 也 OK）。
+
+**絕對不要**用 Read+Write 或 Edit 編輯 `food_reference.csv`（會破壞 race 保護）。同理 `diet_log.csv` 也用 append (`echo >> file`) 而非 Write/Edit。
 
 ## 體重追蹤
 
