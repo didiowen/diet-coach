@@ -1,5 +1,18 @@
 # Changelog
 
+## [v0.3.2] — 2026-06-09
+
+### 新功能
+
+- **`food-ref-append.py`**：`fcntl.flock` + `(food_name, source)` dedupe 的 helper script，多人共用 bot 並發呼叫 race-free
+  - CSV 路徑可用 env var `DIET_COACH_FOOD_REF` 覆蓋，預設為 `~/diet-coach/food_reference.csv`
+  - Skip 重複品項（idempotent）；append 新品項
+- SKILL.md「不需確認直接存入」改成指示 Claude 呼叫此 script，禁止用 Read+Write/Edit 直接編輯 food_reference.csv
+
+### 改進
+
+- 防止 lost-update：兩個 session 同時 read-modify-write 不會互相蓋掉
+
 ## [v0.3.1] — 2026-06-09
 
 ### 新功能
