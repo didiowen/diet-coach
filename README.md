@@ -53,20 +53,23 @@ food_name, source, serving_size_g, calories, protein_g, carb_g, fat_g, notes
 
 ## Telegram 設置
 
-> 完整教學：[Claude Code Telegram 快速設置](https://abmedia.io/claude-code-telegram-quick-setup)
+> 官方 plugin 完整教學：[Claude Code Telegram 快速設置](https://abmedia.io/claude-code-telegram-quick-setup)
 
-### 前置需求
+兩種設置方案，擇一即可：
 
-- 已安裝 Claude Code（`claude` 指令可執行）
-- 已安裝 [Bun](https://bun.sh)：`curl -fsSL https://bun.sh/install | bash`
+- **選項 A — 官方 MCP plugin**：安裝最簡單、Claude Code session 內配對；適合單一 chat、單一工作目錄
+- **選項 B — [ctb](https://github.com/htlin222/claude-telegram-bot) (社群方案)**：獨立進程，內建 user allowlist、相片下載；可在不同 chat 共用同一個 bot 路由到不同目錄（多人共用 diet-coach 適用）
 
-### 設置步驟
+### 共用前置需求
 
-**Step 1 — 建立 Telegram Bot**
+- 已建立 Telegram Bot：DM [@BotFather](https://t.me/botfather)、`/newbot`、依提示完成、取得 Token（格式 `123456789:AAH...`）
+- 知道自己的 Telegram user_id：DM [@userinfobot](https://t.me/userinfobot)（選項 B 的 allowlist 必須）
 
-在 Telegram 搜尋 `@BotFather`，輸入 `/newbot`，依提示建立 Bot 並取得 Token（格式：`123456789:AAHfiqks...`）。
+### 選項 A — 官方 MCP plugin
 
-**Step 2 — 安裝插件**
+需求：已安裝 Claude Code（`claude` 指令）與 [Bun](https://bun.sh)（`curl -fsSL https://bun.sh/install | bash`）。
+
+**Step 1 — 安裝插件**
 
 進入 Claude Code session，執行：
 ```
@@ -74,13 +77,13 @@ food_name, source, serving_size_g, calories, protein_g, carb_g, fat_g, notes
 /reload-plugins
 ```
 
-**Step 3 — 設定 Token**
+**Step 2 — 設定 Token**
 
 ```
 /telegram:configure 你的_BOT_TOKEN
 ```
 
-**Step 4 — 以 Channels 模式重啟**
+**Step 3 — 以 Channels 模式重啟**
 
 ```bash
 claude --channels plugin:telegram@claude-plugins-official
@@ -88,17 +91,48 @@ claude --channels plugin:telegram@claude-plugins-official
 
 > 注意：必須加 `--channels` 參數，Bot 才會上線；單獨執行 `claude` 不會收到訊息。
 
-**Step 5 — 配對**
+**Step 4 — 配對**
 
-1. 在 Telegram 傳任意訊息給 Bot → 收到 6 字元配對碼
+1. Telegram 傳任意訊息給 Bot → 收到 6 字元配對碼
 2. 回到 Claude Code session，執行：`/telegram:access pair <配對碼>`
 3. 確認提示選 **Yes**
 
-**Step 6 — 鎖定存取**
+**Step 5 — 鎖定存取**
 
 ```
 /telegram:access policy allowlist
 ```
+
+### 選項 B — ctb (社群方案)
+
+需求：Node.js + npm。
+
+**Step 1 — 安裝**
+
+```bash
+npm install -g ctb
+```
+
+**Step 2 — 設定 .env**
+
+在你的 diet-coach 工作目錄（例如 `~/diet-coach/`）建立 `.env`：
+
+```
+TELEGRAM_BOT_TOKEN=你的_BOT_TOKEN
+TELEGRAM_ALLOWED_USERS=你的_user_id
+```
+
+> `TELEGRAM_ALLOWED_USERS` 是逗號分隔的 user_id 清單；不設則任何人都能 DM bot，不建議。
+
+**Step 3 — 啟動**
+
+```bash
+cd ~/diet-coach && ctb
+```
+
+Bot 上線後 DM 它即可。ctb 把訊息路由到啟動時的工作目錄，並自動把相片下載成本地檔案路徑供 Claude 讀取；無需另外設定相片處理。
+
+ctb 進階用法（多人 allowlist 各自 routing、`/cd` 切換工作目錄、相片下載等）詳見 [htlin222/claude-telegram-bot](https://github.com/htlin222/claude-telegram-bot) README。
 
 ## BMR / TDEE 計算方式
 
