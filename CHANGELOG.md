@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.3.3] — 2026-06-09
+
+### 改進
+
+- SKILL.md placeholder 統一化：移除 `<path-to>/diet_log.csv` 與 `<path-to>/food-ref-append.py` 兩處placeholder，改用一致的 `~/diet-coach/...` 形式
+- 對 multi-tenant 部署（同機器跑多個 friend dir 例：`~/diet-coach-alex/`、`~/diet-coach-yu/`）更友善 — 一次 sed 替換即可全文 retarget
+
 ## [v0.3.2] — 2026-06-09
 
 ### 新功能

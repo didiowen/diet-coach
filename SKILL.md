@@ -81,7 +81,7 @@ description: Estimates calories and macros for food (Taiwanese cuisine, restaura
 每次 session 啟動或收到新食物訊息時，先 grep 當天日期的 diet_log.csv 條目：
 
 ```sh
-grep "^$(date +%Y-%m-%d)" <path-to>/diet_log.csv
+grep "^$(date +%Y-%m-%d)" ~/diet-coach/diet_log.csv
 ```
 
 這是為了：
@@ -182,7 +182,7 @@ grep "^$(date +%Y-%m-%d)" <path-to>/diet_log.csv
 讀到營養標示就**呼叫 helper script 寫入**（多人共用 bot 時 race-free），不需問使用者，完成後告知已記錄：
 
 ```sh
-python3 <path-to>/food-ref-append.py \
+python3 ~/diet-coach/food-ref-append.py \
   --food-name "<品名>" --source "<品牌/來源>" --serving-size-g <num> \
   --calories <num> --protein-g <num> --carb-g <num> --fat-g <num> \
   --notes "<備註>"
