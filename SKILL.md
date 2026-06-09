@@ -77,6 +77,20 @@ description: Estimates calories and macros for food (Taiwanese cuisine, restaura
 
 ## 估算流程
 
+### 0. 啟動時讀取當日紀錄（強制）
+每次 session 啟動或收到新食物訊息時，先 grep 當天日期的 diet_log.csv 條目：
+
+```sh
+grep "^$(date +%Y-%m-%d)" <path-to>/diet_log.csv
+```
+
+這是為了：
+- 避免重複記錄已寫入的條目
+- 避免誤答使用者「我有沒有記到 X 餐」時說沒寫
+- 累積當日總和時不漏算
+
+不要等使用者問才查 — 每次回覆估算前都先看一次。
+
 ### 1. 辨識食物
 - 列出食材和估算份量
 - 不確定時主動詢問（特別是醬料、烹調方式、油量）
