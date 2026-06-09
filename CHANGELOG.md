@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.3.4] — 2026-06-10
+
+### 改進
+
+- README Telegram 設置改為兩方案並列：**選項 A — 官方 MCP plugin**（Claude Code 內建配對、單 chat） vs **選項 B — [ctb](https://github.com/htlin222/claude-telegram-bot)（社群方案）**（獨立進程、user allowlist、內建相片下載；多人共用 diet-coach 適用）
+- 「建 BotFather Bot + 拿 user_id」抽成「共用前置需求」段落，讓兩方案的步驟更聚焦
+- ctb 段落涵蓋 `npm install -g ctb`、`.env`（`TELEGRAM_BOT_TOKEN` + `TELEGRAM_ALLOWED_USERS`）、`cd <workdir> && ctb` 啟動；進階用法（多人 routing、`/cd`、相片下載）連結 upstream README
+
 ## [v0.3.3] — 2026-06-09
 
 ### 改進
