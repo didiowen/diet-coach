@@ -36,6 +36,15 @@ bot.catch((error) => {
 console.log("Starting diet-coach Codex Telegram bot");
 console.log(`Workspace: ${config.workspace}`);
 
+void bot.api
+  .getMe()
+  .then((botInfo) => {
+    console.log(`Telegram bot: @${botInfo.username ?? "(no username)"} (${botInfo.id})`);
+  })
+  .catch((error: unknown) => {
+    console.error("Telegram getMe failed", describeError(error));
+  });
+
 let stopping = false;
 function stopBot(signal: NodeJS.Signals): void {
   if (stopping) {
@@ -50,6 +59,21 @@ function stopBot(signal: NodeJS.Signals): void {
 process.once("SIGINT", () => stopBot("SIGINT"));
 process.once("SIGTERM", () => stopBot("SIGTERM"));
 
+console.log("Starting Telegram polling");
 await bot.start({
   drop_pending_updates: true,
 });
+
+function describeError(error: unknown): { name: string; message: string } {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+    };
+  }
+
+  return {
+    name: "UnknownError",
+    message: String(error),
+  };
+}

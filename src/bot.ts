@@ -31,14 +31,38 @@ type PromptTurnFactory = () => Promise<PromptTurn>;
 
 export function createBot(config: DietCoachConfig): Bot<Context> {
   const bot = new Bot<Context>(config.telegramBotToken);
-  bot.api.config.use(autoRetry());
+  bot.api.config.use(
+    autoRetry({
+      maxRetryAttempts: 3,
+      maxDelaySeconds: 10,
+      rethrowHttpErrors: true,
+    }),
+  );
 
   const sessions = new Map<number, CodexSession>();
   const busyChats = new Set<number>();
 
   bot.use(async (ctx, next) => {
+    if (ctx.message) {
+      console.info("Telegram update received", {
+        updateId: ctx.update.update_id,
+        fromId: ctx.from?.id,
+        chatId: ctx.chat?.id,
+        chatType: ctx.chat?.type,
+        messageKind: classifyMessage(ctx),
+      });
+    }
+
+    await next();
+  });
+
+  bot.use(async (ctx, next) => {
     const userId = ctx.from?.id;
     if (!userId || !config.telegramAllowedUserIdSet.has(userId)) {
+      console.info("Telegram update rejected by allowlist", {
+        updateId: ctx.update.update_id,
+        fromId: userId,
+      });
       if (ctx.message) {
         await ctx.reply("Unauthorized");
       }
@@ -49,7 +73,13 @@ export function createBot(config: DietCoachConfig): Bot<Context> {
   });
 
   bot.use(async (ctx, next) => {
-    if (ctx.chat?.type !== "private") {
+    const chat = ctx.chat;
+    if (chat?.type !== "private") {
+      console.info("Telegram update rejected outside private chat", {
+        updateId: ctx.update.update_id,
+        chatId: chat?.id,
+        chatType: chat?.type,
+      });
       if (ctx.message) {
         await ctx.reply("此 bot 僅支援私人聊天，請私訊使用。");
       }
@@ -125,6 +155,21 @@ export function createBot(config: DietCoachConfig): Bot<Context> {
   });
 
   return bot;
+}
+
+function classifyMessage(ctx: Context): string {
+  const message = ctx.message;
+  if (!message) {
+    return "unknown";
+  }
+  if (typeof message.text === "string") {
+    return message.text.startsWith("/") ? "command" : "text";
+  }
+  if ("photo" in message) {
+    return "photo";
+  }
+
+  return "other";
 }
 
 async function handlePrompt(
