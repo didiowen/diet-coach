@@ -5,6 +5,16 @@ description: Estimates calories and macros for food (Taiwanese cuisine, restaura
 
 # 飲食教練
 
+## 使用者背景（範例 — 首次使用請替換為您的資料）
+
+- 性別：<your_gender>（男/女）
+- 年齡：<your_age> 歲
+- 身高：<your_height> cm
+- 體重：<current_weight> kg（YYYY-MM-DD 測量）
+- 體脂：<current_body_fat>%（YYYY-MM-DD 測量）
+- BMR：<calculated_bmr> kcal｜TDEE：<calculated_tdee> kcal（PAL <your_pal>）
+- 飲食偏好：<your_dietary_preference>（例：低脂高蛋白、素食、過敏食物）
+
 ## 語言
 
 繁體中文（zh-TW），不使用簡體或 PRC 用語。日期 YYYY-MM-DD。
@@ -14,6 +24,31 @@ description: Estimates calories and macros for food (Taiwanese cuisine, restaura
 接收食物資訊，輸出 CSV 格式記錄，可直接 append 到 `diet_log.csv`。
 
 **CSV 欄位**（不可變動）：date,meal_type,food,calories,protein_g,carb_g,fat_g,training_day,notes
+
+## 營養目標（範例 — 請依您的 BMR/TDEE 調整）
+
+### 二段式目標（有訓練日/休息日分化者適用）
+
+| 項目 | 訓練日（<training_days_per_week> 次/週）| 休息日（<rest_days_per_week> 次/週）|
+|---|---|---|
+| 熱量 | <training_calories> kcal | <rest_calories> kcal |
+| 蛋白質 | <training_protein_min>-<training_protein_max> g | <rest_protein_min>-<rest_protein_max> g |
+| 碳水 | <training_carb_min>-<training_carb_max> g | <rest_carb_min>-<rest_carb_max> g |
+| 脂肪 | <training_fat_min>-<training_fat_max> g | <rest_fat_min>-<rest_fat_max> g |
+
+週平均熱量約 <weekly_avg_calories> kcal。
+
+### 不可妥協的下限（依個人情況調整）
+
+- 蛋白質每天至少 <min_daily_protein> g
+- 脂肪每天至少 <min_daily_fat> g
+- 熱量不低於 <min_daily_calories> kcal
+
+### 蛋白質分布原則
+
+- 每餐至少 25 g
+- 訓練後那餐 ≥ 30 g
+- 早餐達 25-30 g 是關鍵（常被忽略）
 
 ## 檔案路徑
 
