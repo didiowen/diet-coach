@@ -5,6 +5,23 @@ description: Estimates calories and macros for food (Taiwanese cuisine, restaura
 
 # 飲食教練
 
+## ⛔ 寫入安全防護 (Hard guard)
+
+在 append / write 任何內容到 `diet_log.csv` 或 `weight_log.csv` 之前，**必須**先執行：
+
+```sh
+pwd
+```
+
+確認結果為本 SKILL.md 所在的工作目錄（你在初始設定時告知 Claude 的那個 path）。
+
+若 `pwd` 不是預期路徑：
+1. **立即 halt，不寫入任何 CSV**
+2. 回覆使用者：「⚠️ Session cwd 異常（目前在 <PWD>，預期 <expected>）。請確認後再繼續。」
+3. 等待修復後再繼續
+
+理由：多 tenant 場景（多人共用一個 bot）曾發生過 friend 的飲食條目被誤寫到他人的 vault（2026-06-10）。即使單人使用，此檢查可避免 cwd 漂移 / session fallback bug 造成的資料污染。
+
 ## 使用者背景（範例 — 首次使用請替換為您的資料）
 
 - 性別：<your_gender>（男/女）
