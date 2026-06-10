@@ -132,6 +132,15 @@ cd ~/diet-coach && ctb
 
 Bot 上線後 DM 它即可。ctb 把訊息路由到啟動時的工作目錄，並自動把相片下載成本地檔案路徑供 Claude 讀取；無需另外設定相片處理。
 
+**（選用）改用 Codex / ChatGPT 免費額度**
+
+ctb 內建 `claude` 與 `codex` 兩個 provider。如果想省 Claude token，可改走 ChatGPT 帳號的免費 Codex 額度：
+
+1. 先在 terminal 跑一次 `codex` CLI 完成 OAuth（產出 `~/.codex/auth.json`）— 詳見 [openai/codex](https://github.com/openai/codex)
+2. ctb 啟動後 DM bot 打 `/provider codex` 切換
+
+注意：diet-coach 的 prompt 都在 Claude 上調校，Codex（GPT-5.x）的食物估算與 zh-TW 輸出品質請自行實測。
+
 ctb 進階用法（多人 allowlist 各自 routing、`/cd` 切換工作目錄、相片下載等）詳見 [htlin222/claude-telegram-bot](https://github.com/htlin222/claude-telegram-bot) README。
 
 ## BMR / TDEE 計算方式
