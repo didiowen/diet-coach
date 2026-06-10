@@ -1,0 +1,6 @@
+.env*
+!.env.example
+.diet-coach/
+node_modules/
+dist/
+coverage/
