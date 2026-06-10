@@ -4,7 +4,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill%20Based-blueviolet?logo=anthropic)](https://claude.ai/claude-code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-透過 Telegram 傳送食物照片或文字，讓 Claude Code 自動估算熱量和巨量營養素，並記錄到本地 CSV 檔。
+透過 Telegram 傳送食物照片或文字，讓 Claude Code 或 Codex 自動估算熱量和巨量營養素，並記錄到本地 CSV 檔。
 
 ## 功能
 
@@ -19,14 +19,14 @@
 ## 運作方式
 
 1. 透過 Telegram bot 傳送食物照片或文字描述
-2. Claude 讀取 `SKILL.md`，估算營養素（附誤差範圍），必要時主動詢問
+2. Claude 或 Codex 讀取 `SKILL.md`，估算營養素（附誤差範圍），必要時主動詢問
 3. 結果 append 到 `diet_log.csv`，並 git commit / push
 
 ## 檔案說明
 
 | 檔案 | 用途 |
 |------|------|
-| `SKILL.md` | Claude Code skill 設定——行為規則、目標、估算原則 |
+| `SKILL.md` | Claude Code / Codex skill 設定——行為規則、目標、估算原則 |
 | `diet_log.csv` | 模板：逐餐營養記錄 |
 | `food_reference.csv` | 模板：食品資料庫（可從照片自動累積） |
 | `weight_log.csv` | 模板：體重/體脂歷史記錄 |
@@ -130,7 +130,7 @@ TELEGRAM_ALLOWED_USERS=你的_user_id
 cd ~/diet-coach && ctb
 ```
 
-Bot 上線後 DM 它即可。ctb 把訊息路由到啟動時的工作目錄，並自動把相片下載成本地檔案路徑供 Claude 讀取；無需另外設定相片處理。
+Bot 上線後 DM 它即可。ctb 把訊息路由到啟動時的工作目錄，並自動把相片下載成本地檔案路徑供 Claude 或 Codex 讀取；無需另外設定相片處理。
 
 **（選用）改用 Codex / ChatGPT 免費額度**
 
@@ -170,7 +170,7 @@ ctb 進階用法（多人 allowlist 各自 routing、`/cd` 切換工作目錄、
 
 在 `SKILL.md` 中調整以下區塊：
 
-- **初始設定**：首次使用時 Claude 會詢問基本資料，自動計算 BMR/TDEE 並設定目標
+- **初始設定**：首次使用時 Claude 或 Codex 會詢問基本資料，自動計算 BMR/TDEE 並設定目標
 - **NG食物管理**：定義哪些食物算 NG、每週限制次數、超標時的回應風格
 
 ## 注意事項
