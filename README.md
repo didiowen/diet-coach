@@ -141,6 +141,16 @@ ctb 內建 `claude` 與 `codex` 兩個 provider。如果想省 Claude token，�
 
 注意：diet-coach 的 prompt 都在 Claude 上調校，Codex（GPT-5.x）的食物估算與 zh-TW 輸出品質請自行實測。
 
+**（進階）改裝 diet-coach-bot fork**
+
+想拿到較新的 Claude model IDs（haiku-4-5、sonnet-4-6、opus-4-7；upstream 還是 haiku-3-5 → 已退役）與 `ALLOWED_PATHS` `~` expansion bug fix，可改裝本專案專屬的 ctb fork：
+
+```bash
+npm install -g github:didiowen/diet-coach-bot
+```
+
+其餘用法與 upstream 完全相同。差異詳見 [diet-coach-bot README](https://github.com/didiowen/diet-coach-bot)。
+
 ctb 進階用法（多人 allowlist 各自 routing、`/cd` 切換工作目錄、相片下載等）詳見 [htlin222/claude-telegram-bot](https://github.com/htlin222/claude-telegram-bot) README。
 
 ## BMR / TDEE 計算方式
