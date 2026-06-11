@@ -1,5 +1,23 @@
 # Changelog
 
+## [v0.5.1] — 2026-06-12
+
+### 修正（critical — 公版裝完即壞的真實 bug）
+
+- **新增 `weight_log.csv` 模板**：README 與 SKILL.md 一直 reference 它，但 repo 根本沒有這個檔；使用者跑體重追蹤流程會 file-not-found。
+- **README 安裝步驟補完**：原本只說「複製 SKILL.md + 兩個 CSV」，缺了 `weight_log.csv` 模板、`scripts/` 整個資料夾、和明確的 `~/diet-coach/` 資料目錄建立步驟。SKILL.md 裡的 helper script 用 relative path `scripts/...`，使用者照舊版步驟裝完會 command-not-found。
+- **SKILL.md helper path 統一**：4 支 helper 全部改為 `~/diet-coach/scripts/<helper>.py` 絕對形式（原本 BMR / diet-summary / pal-from-log 是 bare relative、food-ref-append 是絕對，3 vs 1 不一致）。
+
+### 改進
+
+- **SKILL.md NG `#(自訂)` placeholder** → `<your_threshold>`，並補一行說明用法，與其他 `<your_*>` 風格一致。
+- **SKILL.md 重算流程 step 2**：原文「若缺則先詢問一次」會誤導——`bmr-tdee.py` `--gender` 是 argparse `required=True`，缺就直接 argparse 退；改為「先詢問使用者並補入『使用者背景』，再 invoke script」，並括號提醒不能跳過。
+
+### Migration
+
+- 既有自訂安裝者不受影響。新使用者照新 README 安裝。
+- 既有客製 NG `#(自訂)` 仍可運作（Claude 自然語言解讀），但建議改為實際數字。
+
 ## [v0.5.0] — 2026-06-11
 
 ### 改進
