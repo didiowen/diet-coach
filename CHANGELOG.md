@@ -1,5 +1,19 @@
 # Changelog
 
+## [v0.4.1] — 2026-06-11
+
+### 新功能
+
+- **`scripts/pal-from-log.py`**：從 `diet_log.csv` 過去 N 天訓練頻率推薦 PAL
+  - 數視窗內 `training_day=TRUE` 的獨立日期，正規化為 sessions/week
+  - 對照 Mifflin 標準 PAL 表（1.20 / 1.375 / 1.55 / 1.725 / 1.90）取一桶
+  - 視窗內 < 3 個記錄日 → 印 sparse 警告
+
+### 改進
+
+- SKILL.md 體重追蹤「重算流程」第 1 步從手算 PAL 改為呼叫 `pal-from-log.py`；第 2 步將 `--pal` 改成必填（接收第 1 步推薦值），不再 fallback `[--NEW PAL]` 佔位
+- 重算流程現在跟著訓練頻率自動調整 PAL，而非只用初始設定值
+
 ## [v0.4.0] — 2026-06-11
 
 ### 新功能

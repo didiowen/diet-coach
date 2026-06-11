@@ -216,13 +216,19 @@ python3 ~/diet-coach/scripts/food-ref-append.py \
 使用者傳送含體重或體脂的訊息（例：「體重 54.5」、「體脂 22%」、「54.8kg，體脂21」）時，觸發重算流程。
 
 ### 重算流程
-1. 以過去14天訓練頻率重新計算 PAL
-2. 呼叫
-   
-```sh
-scripts/bmr-tdee.py --weight <kg> --height <cm> --age <yr> \
-  --gender female|male [--body-fat-pct <pct>] [--NEW PAL]
-```
+1. 以過去 14 天訓練頻率重算 PAL：
+   ```sh
+   scripts/pal-from-log.py --csv <path-to-diet_log.csv>
+   ```
+   - 輸出建議 PAL（從 1.20 / 1.375 / 1.55 / 1.725 / 1.90 五桶取一）
+   - 視窗內 < 3 個記錄日 → 印 sparse 警告，建議維持當前 PAL
+2. 呼叫 helper 算 BMR/TDEE：
+   ```sh
+   scripts/bmr-tdee.py --weight <kg> --height <cm> --age <yr> \
+     --gender female|male [--body-fat-pct <pct>] --pal <new_pal>
+   ```
+   - 有 body fat pct → Katch-McArdle；否則 fallback Mifflin-St Jeor
+   - 從「使用者背景」讀身高、年齡、性別；若缺則先詢問一次
 3. 依當前目標（減脂/增肌/維持）計算訓練日/休息日目標：
    - 減脂：熱量赤字 15–20%；蛋白質 2.0–2.2 g/kg；脂肪下限 0.8 g/kg
    - 增肌：熱量盈餘 5–10%；蛋白質 1.8–2.0 g/kg
