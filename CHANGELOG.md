@@ -1,5 +1,21 @@
 # Changelog
 
+## [v0.6.0] — 2026-06-12
+
+### 新功能
+
+- **`tests/` 資料夾 + pytest 測試套件**：4 支 helper 共 25 個測試案例（happy + error path），無外部依賴只用 stdlib + pytest。
+  - `test_bmr_tdee.py`：Mifflin (男/女)、Katch-McArdle override、custom PAL、4 個 error path
+  - `test_diet_summary.py`：訓練日／休息日／空 entries／missing file／bad date／missing columns
+  - `test_pal_from_log.py`：normal recommendation、sparse warning、empty window 不 hard-output PAL、3 個 error path
+  - `test_food_ref_append.py`：append、dedup、negative number、non-numeric、missing CSV
+- **GitHub Actions CI workflow**（`.github/workflows/ci.yml`）：ubuntu-latest + macos-latest × Python 3.11 + 3.12（4 cell matrix），步驟為 checkout / setup-python / pip install pytest / py_compile / pytest。
+- **README CI badge**：可一眼看到 main 是否綠燈。
+
+### 為何重要
+
+v0.5.0 引進 helper hardening 後，每個 release 都該證明 happy + error path 都不會 regress。在 PR 階段擋下 bug 比 release 後使用者回報快。
+
 ## [v0.5.1] — 2026-06-12
 
 ### 修正（critical — 公版裝完即壞的真實 bug）
