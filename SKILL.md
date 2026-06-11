@@ -85,12 +85,19 @@ pwd
 
 ## BMR / TDEE 計算
 
-### BMR — Mifflin-St Jeor（1990，臨床常用）
+### 使用 helper script（建議）
 
-| 性別 | 公式 |
-|------|------|
-| 男 | BMR = 10 × 體重(kg) + 6.25 × 身高(cm) − 5 × 年齡 + 5 |
-| 女 | BMR = 10 × 體重(kg) + 6.25 × 身高(cm) − 5 × 年齡 − 161 |
+```sh
+scripts/bmr-tdee.py --weight <kg> --height <cm> --age <yr> \
+  --gender female|male [--body-fat-pct <pct>] [--pal 1.55]
+```
+
+腳本自動選公式：
+
+- 有 body fat pct → **Katch-McArdle**：`BMR = 370 + 21.6 × LBM`，其中 `LBM = 體重 × (1 - 體脂率)`。不依性別、考慮瘦體組織量，較準。
+- 無 body fat pct → **Mifflin-St Jeor**（1990，臨床常用，依性別）：
+  - 男：`BMR = 10 × 體重 + 6.25 × 身高 − 5 × 年齡 + 5`
+  - 女：`BMR = 10 × 體重 + 6.25 × 身高 − 5 × 年齡 − 161`
 
 ### TDEE = BMR × 活動係數（PAL）
 
@@ -167,6 +174,13 @@ grep "^$(date +%Y-%m-%d)" ~/diet-coach/diet_log.csv
 ### 6. 輸出 CSV 記錄
 每項食物一行，數值用中位數，可直接 append 到 `diet_log.csv`。
 
+### 7. 當日累計（按需）
+使用者問「今天還能吃多少」「累計多少」之類，跑：
+```sh
+scripts/diet-summary.py --csv <path-to-diet_log.csv> [--date YYYY-MM-DD]
+```
+回報累計 kcal/P/C/F + 訓練日狀態，再對照當日目標說剩餘預算。
+
 ## 估算原則
 
 ### 烹調方式對熱量影響
@@ -234,7 +248,7 @@ grep "^$(date +%Y-%m-%d)" ~/diet-coach/diet_log.csv
 讀到營養標示就**呼叫 helper script 寫入**（多人共用 bot 時 race-free），不需問使用者，完成後告知已記錄：
 
 ```sh
-python3 ~/diet-coach/food-ref-append.py \
+python3 ~/diet-coach/scripts/food-ref-append.py \
   --food-name "<品名>" --source "<品牌/來源>" --serving-size-g <num> \
   --calories <num> --protein-g <num> --carb-g <num> --fat-g <num> \
   --notes "<備註>"
@@ -242,7 +256,7 @@ python3 ~/diet-coach/food-ref-append.py \
 
 腳本內含 `fcntl.flock` 序列化 + `(food_name, source)` dedupe。並發呼叫安全、重複品項自動 skip。
 
-參考實作：本 repo 的 `food-ref-append.py`（或設置 single-user 時可省略，直接 append CSV 也 OK）。
+參考實作：本 repo 的 `scripts/food-ref-append.py`（或設置 single-user 時可省略，直接 append CSV 也 OK）。
 
 **絕對不要**用 Read+Write 或 Edit 編輯 `food_reference.csv`（會破壞 race 保護）。同理 `diet_log.csv` 也用 append (`echo >> file`) 而非 Write/Edit。
 
