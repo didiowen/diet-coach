@@ -1,5 +1,22 @@
 # Changelog
 
+## [v0.4.0] — 2026-06-11
+
+### 新功能
+
+- **`bmr-tdee.py`**：BMR/TDEE 計算 helper
+  - 有 `--body-fat-pct` 自動用 **Katch-McArdle**（`370 + 21.6 × LBM`，不依性別、更準）
+  - 否則 fallback **Mifflin-St Jeor**（依性別）
+  - TDEE = BMR × PAL（預設 1.55，可用 `--pal` 覆寫）
+- **`diet-summary.py`**：當日（或指定日期）累計 helper
+  - 從 `diet_log.csv` grep 出指定日期條目、加總 kcal/P/C/F、附訓練日狀態
+  - 預設讀取 `./diet_log.csv`，可用 `--csv` 覆寫
+
+### 改進
+
+- SKILL.md 「BMR / TDEE 計算」段落：公式表抽到 helper script，文件留下公式說明 + script 呼叫範例，更簡潔
+- SKILL.md 估算流程新增 **Step 7：當日累計（按需）**，回答「今天還能吃多少」之類問題時直接呼叫 helper
+
 ## [v0.3.5] — 2026-06-10
 
 ### 改進
