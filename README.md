@@ -1,5 +1,6 @@
 # 飲食教練
 
+[![CI](https://github.com/didiowen/diet-coach/actions/workflows/ci.yml/badge.svg)](https://github.com/didiowen/diet-coach/actions/workflows/ci.yml)
 [![Made in Taiwan](https://img.shields.io/badge/Made%20in-Taiwan%20%F0%9F%87%B9%F0%9F%87%BC-red)](https://github.com/htlin222/society-calendar)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill%20Based-blueviolet?logo=anthropic)](https://claude.ai/claude-code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
