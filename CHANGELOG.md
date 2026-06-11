@@ -1,5 +1,24 @@
 # Changelog
 
+## [v0.7.0] — 2026-06-12
+
+### 新增（README 文件補完）
+
+- **「第一日 walkthrough」**：mock Telegram 對話展示首次使用流程，讓新使用者能預期 bot 行為。
+- **「升級」**：升級步驟（`git pull` template → 看 CHANGELOG → 同步 SKILL.md/scripts）+ semver 政策說明（patch/minor/major 各自承諾）。
+- **「CSV schema 鎖死宣告」**：v1.x backward compat 承諾——既有欄位、順序、名稱、單位永不變動；只允許 append-only 新增可選欄位。v0.x 階段尚未承諾，要看 CHANGELOG migration 區段。
+- **「Troubleshooting」**：6 個常見問題的修法（Claude 沒讀到 skill / Python missing / 權限 / CSV 不存在 / ctb bot 不回 / food-ref 寫不進）。
+
+### 改進
+
+- **CONTRIBUTING.md**：新增條目流程改為呼叫 `scripts/food-ref-append.py`，避免手動編輯 CSV 引起 race condition 與 escape bug。附使用範例與「為何不能手動編輯」說明。
+- **README ctb option B Step 3**：補 `source .env`，原本省略會 silent 啟動失敗。
+- **`pal-from-log.py` cosmetic**：印 `recommended PAL: 1.20` 而非 `1.2`，與 PAL 表 (`1.20 / 1.375 / 1.55 ...`) 風格一致。
+
+### Migration
+
+無 breaking change。既有使用者直接 `git pull` 套用文件改進；如有客製 CONTRIBUTING 流程請參考新範例。
+
 ## [v0.6.0] — 2026-06-12
 
 ### 新功能
