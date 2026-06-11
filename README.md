@@ -28,8 +28,8 @@
 |------|------|
 | `SKILL.md` | Claude Code / Codex skill 設定——行為規則、目標、估算原則 |
 | `diet_log.csv` | 模板：逐餐營養記錄 |
-| `food_reference.csv` | 模板：食品資料庫（可從照片自動累積） |
-| `weight_log.csv` | 模板：體重/體脂歷史記錄 |
+| `food_reference.csv` | 模板：食品資料庫（可從照片自動累積；公版內建台灣食藥署 2,160 筆） |
+| `weight_log.csv` | 模板：體重/體脂歷史記錄（header only） |
 | `scripts/bmr-tdee.py` | BMR/TDEE 計算（Katch-McArdle 或 Mifflin-St Jeor） |
 | `scripts/diet-summary.py` | 當日累計 kcal/P/C/F 從 `diet_log.csv` 加總 |
 | `scripts/pal-from-log.py` | 從 `diet_log.csv` 過去 N 天訓練頻率推薦 PAL |
@@ -49,11 +49,29 @@ food_name, source, serving_size_g, calories, protein_g, carb_g, fat_g, notes
 
 ## 安裝步驟
 
-1. 將 `SKILL.md` 放到 `~/.claude/skills/diet-coach/SKILL.md`
-2. 建立個人資料目錄（例如私有 git repo）
-3. 將 `diet_log.csv`、`food_reference.csv` 模板複製到該目錄，並在 `SKILL.md` 更新路徑
-4. 設定 Telegram（見下方教學）
-5. 傳送食物照片或描述，Claude 自動處理
+```bash
+# 1. Clone 本 repo（拿模板和 helper 腳本）
+git clone https://github.com/didiowen/diet-coach.git ~/diet-coach-template
+
+# 2. 建立個人資料目錄（建議放私有 git repo 或 Google Drive，含個人健康資料）
+mkdir -p ~/diet-coach
+
+# 3. 複製模板與 helpers 到個人資料目錄
+cp ~/diet-coach-template/diet_log.csv ~/diet-coach/
+cp ~/diet-coach-template/weight_log.csv ~/diet-coach/
+cp ~/diet-coach-template/food_reference.csv ~/diet-coach/
+cp -r ~/diet-coach-template/scripts ~/diet-coach/
+
+# 4. 把 SKILL.md 放到 Claude Code skills 目錄
+mkdir -p ~/.claude/skills/diet-coach
+cp ~/diet-coach-template/SKILL.md ~/.claude/skills/diet-coach/SKILL.md
+```
+
+5. 在 `SKILL.md` 「使用者背景」區塊填入個人資料（性別、年齡、身高、體重、體脂、目標）
+6. 設定 Telegram（見下方教學）
+7. 傳送食物照片或描述，Claude 自動處理
+
+> SKILL.md 預設路徑為 `~/diet-coach/`。若你用其他位置（例：`~/Dropbox/diet-coach/`），請全文搜尋取代 `~/diet-coach/` 為你的實際路徑。
 
 ## Telegram 設置
 
