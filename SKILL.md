@@ -123,7 +123,7 @@ grep "^$(date +%Y-%m-%d)" ~/diet-coach/diet_log.csv
 ### 5. 輸出 CSV 記錄
 每項食物一行，數值用中位數，可直接 append 到 `diet_log.csv`。
 
-### 5. 對照當日目標
+### 6. 對照當日目標
 
 ```sh
 scripts/diet-summary.py --csv <path-to-diet_log.csv> [--date YYYY-MM-DD]
