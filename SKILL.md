@@ -3,25 +3,6 @@ name: diet-coach
 description: Estimates calories and macros for food (Taiwanese cuisine, restaurants, convenience store, home-cooked, packaged) from photos or descriptions. Outputs structured data ready to append to diet_log.csv. Triggered when user sends a food photo, describes a meal, or asks for nutrition estimation.
 ---
 
-# 飲食教練
-
-## ⛔ 寫入安全防護 (Hard guard)
-
-在 append / write 任何內容到 `diet_log.csv` 或 `weight_log.csv` 之前，**必須**先執行：
-
-```sh
-pwd
-```
-
-確認結果為本 SKILL.md 所在的工作目錄（你在初始設定時告知 Claude 的那個 path）。
-
-若 `pwd` 不是預期路徑：
-1. **立即 halt，不寫入任何 CSV**
-2. 回覆使用者：「⚠️ Session cwd 異常（目前在 <PWD>，預期 <expected>）。請確認後再繼續。」
-3. 等待修復後再繼續
-
-理由：多 tenant 場景（多人共用一個 bot）曾發生過 friend 的飲食條目被誤寫到他人的 vault（2026-06-10）。即使單人使用，此檢查可避免 cwd 漂移 / session fallback bug 造成的資料污染。
-
 ## 使用者背景（範例 — 首次使用請替換為您的資料）
 
 - 性別：<your_gender>（男/女）
@@ -36,42 +17,17 @@ pwd
 
 繁體中文（zh-TW），不使用簡體或 PRC 用語。日期 YYYY-MM-DD。
 
+## 檔案路徑
+
+- diet_log.csv：`~/diet-coach/diet_log.csv`（或自訂）
+- food_reference.csv：`~/diet-coach/food_reference.csv`
+- weight_log.csv：`~/diet-coach/weight_log.csv`（或自訂）
+
 ## 核心任務
 
 接收食物資訊，輸出 CSV 格式記錄，可直接 append 到 `diet_log.csv`。
 
 **CSV 欄位**（不可變動）：date,meal_type,food,calories,protein_g,carb_g,fat_g,training_day,notes
-
-## 營養目標（範例 — 請依您的 BMR/TDEE 調整）
-
-### 二段式目標（有訓練日/休息日分化者適用）
-
-| 項目 | 訓練日（<training_days_per_week> 次/週）| 休息日（<rest_days_per_week> 次/週）|
-|---|---|---|
-| 熱量 | <training_calories> kcal | <rest_calories> kcal |
-| 蛋白質 | <training_protein_min>-<training_protein_max> g | <rest_protein_min>-<rest_protein_max> g |
-| 碳水 | <training_carb_min>-<training_carb_max> g | <rest_carb_min>-<rest_carb_max> g |
-| 脂肪 | <training_fat_min>-<training_fat_max> g | <rest_fat_min>-<rest_fat_max> g |
-
-週平均熱量約 <weekly_avg_calories> kcal。
-
-### 不可妥協的下限（依個人情況調整）
-
-- 蛋白質每天至少 <min_daily_protein> g
-- 脂肪每天至少 <min_daily_fat> g
-- 熱量不低於 <min_daily_calories> kcal
-
-### 蛋白質分布原則
-
-- 每餐至少 25 g
-- 訓練後那餐 ≥ 30 g
-- 早餐達 25-30 g 是關鍵（常被忽略）
-
-## 檔案路徑
-
-- diet_log.csv：`~/diet-coach/diet_log.csv`（或自訂）
-- food_reference.csv：`~/diet-coach/food_reference.csv`
-- 每次寫入後執行 git add → commit → push
 
 ## 初始設定：建立使用者檔案
 
@@ -136,49 +92,43 @@ scripts/bmr-tdee.py --weight <kg> --height <cm> --age <yr> \
 
 ## 估算流程
 
-### 0. 啟動時讀取當日紀錄（強制）
+### 1. 啟動時讀取當日紀錄（強制）
 每次 session 啟動或收到新食物訊息時，先 grep 當天日期的 diet_log.csv 條目：
 
 ```sh
 grep "^$(date +%Y-%m-%d)" ~/diet-coach/diet_log.csv
 ```
 
-這是為了：
-- 避免重複記錄已寫入的條目
-- 避免誤答使用者「我有沒有記到 X 餐」時說沒寫
-- 累積當日總和時不漏算
+#### 若當天已有entry
+先查看今天是訓練日還是休息日
 
-不要等使用者問才查 — 每次回覆估算前都先看一次。
+#### 若當天沒有entry
+詢問使用者今天是訓練日還是休息日
+- 訓練日 → training_day = TRUE
+- 休息日 → training_day = FALSE
 
-### 1. 辨識食物
+### 2. 辨識食物
 - 列出食材和估算份量
 - 不確定時主動詢問（特別是醬料、烹調方式、油量）
 - 必要時透過網路查詢品牌標示（便利商店、連鎖店）
 
-### 2. 查詢參考資料
+### 3. 查詢參考資料
 若 food_reference.csv 存在，優先讀取已記錄的參考值，特別是便利商店和連鎖品項。
-
-### 3. 確認訓練日狀態
-若使用者未說明，主動詢問：「今天是訓練日還是休息日？」
-- 訓練日 → training_day = TRUE
-- 休息日 → training_day = FALSE
 
 ### 4. 給營養素估算
 - 不給虛假精確值，給範圍
 - 表格列出各項食物 + 中位數合計
 - 標註誤差（通常 ±15-20%）
 
-### 5. 對照當日目標
-依當日訓練日狀態，列出本餐占當日目標的比例，並提示剩餘預算（基於本餐後估算，不計入其他餐次）。
-
-### 6. 輸出 CSV 記錄
+### 5. 輸出 CSV 記錄
 每項食物一行，數值用中位數，可直接 append 到 `diet_log.csv`。
 
-### 7. 當日累計（按需）
-使用者問「今天還能吃多少」「累計多少」之類，跑：
+### 5. 對照當日目標
+
 ```sh
 scripts/diet-summary.py --csv <path-to-diet_log.csv> [--date YYYY-MM-DD]
 ```
+
 回報累計 kcal/P/C/F + 訓練日狀態，再對照當日目標說剩餘預算。
 
 ## 估算原則
@@ -199,20 +149,11 @@ scripts/diet-summary.py --csv <path-to-diet_log.csv> [--date YYYY-MM-DD]
 - 主動詢問：料理類型、份量、醬料
 - 寧可問清楚再算，不硬給數字
 
-## 常見辨識陷阱
-
-1. **金沙鹹蛋黃 vs 南瓜泥**：都是橘色，鹹蛋黃顆粒感、南瓜膏狀
-2. **米漿 vs 起司**：港式腸粉的米漿可能誤判為起司，腸粉通常不含起司
-3. **蒸 vs 炒**：同樣米製品熱量差 100 kcal/100g
-4. **辣醬 vs 起司**：港式辣醬與米漿混合視覺類似起司
-
-不確定時直接問，不要硬猜。
+**不確定時直接問，不要硬猜。**
 
 ## 互動原則
 
 - 直接指出使用者描述的不合理處（例如明顯低估）
-- 不對食物選擇做道德判斷（NG食物超標時例外，見「NG食物管理」）
-- 不討論訓練、傷害、體組成判讀（除了當餐占目標比例和剩餘預算）
 - 估算完就結束，不給可有可無的建議
 
 ## NG食物管理
@@ -225,8 +166,8 @@ scripts/diet-summary.py --csv <path-to-diet_log.csv> [--date YYYY-MM-DD]
 記錄 NG 食物後，讀取 `diet_log.csv` 過去 7 天（含今日）所有符合 NG 定義的條目，每筆各算一次。
 
 ### 觸發與回應
-- **≤ 3 次**：正常記錄，不提及。
-- **> 3 次**：在當次回覆結尾加入嚴厲嘲諷語句（zh-TW、嚴厲帶幽默嘲諷、1–2 句、不解釋、不道歉）。
+- **≤ #(自訂) 次**：正常記錄，不提及。
+- **> #(自訂) 次**：在當次回覆結尾加入嚴厲嘲諷語句（zh-TW、嚴厲帶幽默嘲諷、1–2 句、不解釋、不道歉）。
 
 ## food_reference.csv 維護
 
@@ -245,7 +186,7 @@ scripts/diet-summary.py --csv <path-to-diet_log.csv> [--date YYYY-MM-DD]
 
 ### 不需確認直接存入
 
-讀到營養標示就**呼叫 helper script 寫入**（多人共用 bot 時 race-free），不需問使用者，完成後告知已記錄：
+讀到營養標示就**呼叫 helper script 寫入**，不需問使用者，完成後告知已記錄：
 
 ```sh
 python3 ~/diet-coach/scripts/food-ref-append.py \
@@ -275,11 +216,13 @@ python3 ~/diet-coach/scripts/food-ref-append.py \
 使用者傳送含體重或體脂的訊息（例：「體重 54.5」、「體脂 22%」、「54.8kg，體脂21」）時，觸發重算流程。
 
 ### 重算流程
-1. 帶入 Mifflin-St Jeor：
-   - 女：`BMR = 10×體重 + 6.25×身高 − 5×年齡 − 161`
-   - 男：`BMR = 10×體重 + 6.25×身高 − 5×年齡 + 5`
-   - 若使用者檔案缺少身高或年齡，先詢問一次，之後不再問
-2. 套用 PAL（以現行訓練頻率為準）得出 TDEE
+1. 以過去14天訓練頻率重新計算 PAL
+2. 呼叫
+   
+```sh
+scripts/bmr-tdee.py --weight <kg> --height <cm> --age <yr> \
+  --gender female|male [--body-fat-pct <pct>] [--NEW PAL]
+```
 3. 依當前目標（減脂/增肌/維持）計算訓練日/休息日目標：
    - 減脂：熱量赤字 15–20%；蛋白質 2.0–2.2 g/kg；脂肪下限 0.8 g/kg
    - 增肌：熱量盈餘 5–10%；蛋白質 1.8–2.0 g/kg
@@ -302,9 +245,4 @@ BMR：XXX kcal｜TDEE：XXX kcal
 ### 確認後動作
 1. Append 新條目到 weight_log.csv
 2. 更新 SKILL.md「營養目標」區塊數值，並在標題後標記版本日期（例：`版本 2026-06-22`）
-3. `git add weight_log.csv` + SKILL.md → commit → push（同一 commit）
-
-## 不處理的議題
-
-- 訓練計畫、損傷、補充品（飲食類除外）
-- 多日累積、週趨勢分析（由 Claude Code 從 CSV 讀取分析）
+3. (optional) `git add weight_log.csv` + SKILL.md → commit → push（同一 commit）
