@@ -30,9 +30,9 @@
 | `diet_log.csv` | 模板：逐餐營養記錄 |
 | `food_reference.csv` | 模板：食品資料庫（可從照片自動累積） |
 | `weight_log.csv` | 模板：體重/體脂歷史記錄 |
-| `bmr-tdee.py` | BMR/TDEE 計算（Katch-McArdle 或 Mifflin-St Jeor） |
-| `diet-summary.py` | 當日累計 kcal/P/C/F 從 `diet_log.csv` 加總 |
-| `food-ref-append.py` | 並發安全 append `food_reference.csv`（`fcntl.flock` + dedupe） |
+| `scripts/bmr-tdee.py` | BMR/TDEE 計算（Katch-McArdle 或 Mifflin-St Jeor） |
+| `scripts/diet-summary.py` | 當日累計 kcal/P/C/F 從 `diet_log.csv` 加總 |
+| `scripts/food-ref-append.py` | 並發安全 append `food_reference.csv`（`fcntl.flock` + dedupe） |
 
 ## CSV 欄位
 
