@@ -1,5 +1,20 @@
 # Changelog
 
+## [v0.5.0] — 2026-06-11
+
+### 改進
+
+- **Helper script 錯誤處理硬化**——四支 helper 遇到常見錯誤狀況不再噴 stack trace，改印人話 + `exit 1`，朝 v1.0 stability 推進：
+  - **`bmr-tdee.py`**：semantic validation——weight 20–300 kg、height 100–250 cm、age 5–120、body-fat 3–60%、PAL 1.0–2.5；超出範圍直接拒絕
+  - **`diet-summary.py`**：找不到 csv 印路徑 + hint；csv 缺欄位印缺哪些；`--date` 非 ISO 格式拒絕；當日 0 entries 印「當日無記錄」而非 0/0/0
+  - **`pal-from-log.py`**：找不到 csv 印路徑 + hint；csv 缺欄位印缺哪些；`--today` 非 ISO 格式拒絕；`--days < 1` 拒絕；**window 內 0 個 entry 時不再硬輸出 `1.20 sedentary`**——改印 warning 並建議維持當前 PAL
+  - **`food-ref-append.py`**：append 前驗證 `serving_size_g / calories / protein_g / carb_g / fat_g` 為非負 float，拒絕 NaN / 負數 / 非數字
+
+### Migration
+
+- 既有呼叫不受影響（exit code、stdout 格式不變；只多了 `stderr` 錯誤訊息）
+- 邊角行為改變：`pal-from-log.py` 在空 window 時 `exit 0` 不再吐 `recommended PAL: 1.2`——上游程式若 grep `recommended PAL:` 抓建議值，現在會抓不到（這是預期行為，避免誤導）
+
 ## [v0.4.1] — 2026-06-11
 
 ### 新功能
