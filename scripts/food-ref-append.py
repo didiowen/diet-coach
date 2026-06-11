@@ -41,6 +41,23 @@ FIELDS = [
     "food_name", "source", "serving_size_g", "calories",
     "protein_g", "carb_g", "fat_g", "notes",
 ]
+NUMERIC_FIELDS = ["serving_size_g", "calories", "protein_g", "carb_g", "fat_g"]
+
+
+def validate_numeric(row):
+    errs = []
+    for f in NUMERIC_FIELDS:
+        raw = row[f]
+        try:
+            v = float(raw)
+        except ValueError:
+            errs.append(f"--{f.replace('_', '-')} {raw!r} is not a number")
+            continue
+        if v != v:  # NaN check
+            errs.append(f"--{f.replace('_', '-')} is NaN")
+        elif v < 0:
+            errs.append(f"--{f.replace('_', '-')} {v} must be >= 0")
+    return errs
 
 
 def main() -> int:
@@ -52,6 +69,12 @@ def main() -> int:
                        help=f"value for {f} column")
     args = p.parse_args()
     row = {f: getattr(args, f) for f in FIELDS}
+
+    errs = validate_numeric(row)
+    if errs:
+        for e in errs:
+            print(f"error: {e}", file=sys.stderr)
+        return 1
 
     if not CSV_PATH.exists():
         print(f"Error: {CSV_PATH} not found", file=sys.stderr)

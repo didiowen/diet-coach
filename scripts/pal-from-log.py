@@ -21,8 +21,11 @@ Example:
 """
 import argparse
 import csv
+import sys
 from datetime import date as date_cls, timedelta
 from pathlib import Path
+
+REQUIRED_COLS = {"date", "training_day"}
 
 
 def bucket_pal(per_week):
@@ -47,13 +50,34 @@ def main():
                     help="reference 'today' as YYYY-MM-DD (default: actual today)")
     args = ap.parse_args()
 
-    today = date_cls.fromisoformat(args.today)
+    if args.days < 1:
+        print(f"error: --days {args.days} must be >= 1", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        today = date_cls.fromisoformat(args.today)
+    except ValueError:
+        print(f"error: --today {args.today!r} is not valid YYYY-MM-DD", file=sys.stderr)
+        sys.exit(1)
     window_start = today - timedelta(days=args.days - 1)
+
+    try:
+        f = open(args.csv, newline="")
+    except FileNotFoundError:
+        print(f"error: diet_log.csv not found at {args.csv}", file=sys.stderr)
+        print("hint: pass --csv <path> or run from the directory containing diet_log.csv",
+              file=sys.stderr)
+        sys.exit(1)
 
     all_dates = set()
     training_dates = set()
-    with open(args.csv, newline="") as f:
-        for row in csv.DictReader(f):
+    with f:
+        reader = csv.DictReader(f)
+        missing = REQUIRED_COLS - set(reader.fieldnames or [])
+        if missing:
+            print(f"error: {args.csv} missing columns: {sorted(missing)}", file=sys.stderr)
+            sys.exit(1)
+        for row in reader:
             try:
                 d = date_cls.fromisoformat(row["date"])
             except (ValueError, KeyError):
@@ -64,17 +88,21 @@ def main():
             if row.get("training_day", "").strip().upper() == "TRUE":
                 training_dates.add(d)
 
-    n_train = len(training_dates)
-    per_week = n_train * 7 / args.days
-    pal, label = bucket_pal(per_week)
-
     print(f"window: {window_start.isoformat()} -- {today.isoformat()} ({args.days} days)")
-    print(f"training days: {n_train} ({per_week:.1f} /week)")
-    print(f"recommended PAL: {pal} ({label})")
+    print(f"training days: {len(training_dates)} "
+          f"({len(training_dates) * 7 / args.days:.1f} /week)")
+
+    if not all_dates:
+        print("warning: no log entries in window -- keep current PAL until more data is logged")
+        return
 
     if len(all_dates) < 3:
         print(f"warning: only {len(all_dates)} unique log date(s) in window -- "
               f"data sparse, treat recommendation with caution")
+
+    per_week = len(training_dates) * 7 / args.days
+    pal, label = bucket_pal(per_week)
+    print(f"recommended PAL: {pal} ({label})")
 
 
 if __name__ == "__main__":
