@@ -157,29 +157,6 @@ npm install -g github:didiowen/diet-coach-bot
 
 ctb 進階用法（多人 allowlist 各自 routing、`/cd` 切換工作目錄、相片下載等）詳見 [htlin222/claude-telegram-bot](https://github.com/htlin222/claude-telegram-bot) README。
 
-## BMR / TDEE 計算方式
-
-`SKILL.md` 在初始設定時會詢問使用者資料，並以 **Mifflin-St Jeor（1990）** 公式計算基礎代謝率（BMR）：
-
-| 性別 | 公式 |
-|------|------|
-| 男 | BMR = 10 × 體重(kg) + 6.25 × 身高(cm) − 5 × 年齡 + 5 |
-| 女 | BMR = 10 × 體重(kg) + 6.25 × 身高(cm) − 5 × 年齡 − 161 |
-
-再乘上活動係數（PAL）得出 **TDEE（每日總熱量消耗）**：
-
-| 活動量 | PAL |
-|--------|-----|
-| 幾乎不動 | 1.20 |
-| 輕度活動（1–3次/週） | 1.375 |
-| 中度活動（3–5次/週） | 1.55 |
-| 重度活動（6–7次/週） | 1.725 |
-| 極重度活動 | 1.90 |
-
-依目標調整熱量：減脂 TDEE × 0.80–0.85、增肌 TDEE × 1.05–1.10、維持 TDEE。
-
-> 可用 [王介立醫師臨床計算器](https://copper0722.com.tw/calculator/topic/body-size-energy/) 驗算。
-
 ## 個人化設定
 
 在 `SKILL.md` 中調整以下區塊：
@@ -190,6 +167,5 @@ ctb 進階用法（多人 allowlist 各自 routing、`/cd` 切換工作目錄、
 ## 注意事項
 
 - 估算值誤差約 ±15–20%，外食尤其如此
-- 此 repo 為公開模板，不含個人飲食記錄
 - `diet_log.csv`、`weight_log.csv` 實際內容含個人健康資料，建議放私有 repo 或 Google Drive
 - 歡迎共同維護`food_reference.csv`
