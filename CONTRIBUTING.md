@@ -46,9 +46,28 @@ food_name, source, serving_size_g, calories, protein_g, carb_g, fat_g, notes
 ## 提交流程
 
 1. Fork 此 repo
-2. 在 `food_reference.csv` 末尾加入新行（不修改既有行）
+2. 用 **`scripts/food-ref-append.py`** 加入新條目（**不要**手動編輯 CSV——see below）：
+   ```bash
+   DIET_COACH_FOOD_REF=./food_reference.csv \
+     python3 scripts/food-ref-append.py \
+       --food-name "光泉無加糖濃黑豆漿特濃5.1" --source "光泉" \
+       --serving-size-g 375 --calories 204 \
+       --protein-g 19.1 --carb-g 11.6 --fat-g 9.8 \
+       --notes "每盒375ml；黑豆；標示值"
+   ```
+   - 腳本內含 `fcntl.flock` 序列化 + `(food_name, source)` dedupe，race-safe
+   - 重複品項自動 skip（同名同來源），所以 idempotent；可放心多次執行
+   - 透過 helper 寫入比手動編輯 CSV 安全：保證欄位順序、escape、編碼正確
 3. 開 Pull Request，填寫 PR template
 4. 維護者審查後合併
+
+### 為何不能手動編輯 CSV？
+
+- 多人同時提交時，手動編輯 + 直接 commit 容易吃掉別人的條目
+- 中文逗號、引號、跨行 notes 容易破壞 CSV 解析
+- `food-ref-append.py` 用 Python `csv.DictWriter`，escape 規則正確
+
+如果你的環境跑不動 Python（罕見），請在 PR 描述貼出新條目的 CSV 文字，維護者會幫你執行 helper 寫入。
 
 ## 常見問題
 

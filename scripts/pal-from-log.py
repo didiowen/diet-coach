@@ -102,7 +102,7 @@ def main():
 
     per_week = len(training_dates) * 7 / args.days
     pal, label = bucket_pal(per_week)
-    print(f"recommended PAL: {pal} ({label})")
+    print(f"recommended PAL: {pal:.2f} ({label})")
 
 
 if __name__ == "__main__":
