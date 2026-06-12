@@ -1,5 +1,19 @@
 # Changelog
 
+## [v0.9.1] — 2026-06-12
+
+### 改進
+
+- **撤回 symlink 推薦，全面改回 cp**：v0.9.0 的 symlink + auto-backfill 組合會把使用者個人資料寫進 template repo 並被 git 追蹤，升級時要先 commit/stash 才能 git pull——對非工程使用者太繞，容易放棄。改回單純的 `cp` 流程，README 不再列 trade-off 區塊。
+- v0.9.0 的 repo 結構調整（SKILL.md 在 `.claude/skills/diet-coach/`）**保留**——對齊 Claude Code skill 目錄慣例，但安裝命令是純 `cp`。
+- README 升級段：合併成單一 cp 流程（原本拆成 symlink / copy 兩條）。
+- README Troubleshooting：移除 `readlink` symlink 驗證行。
+
+### Migration
+
+- 任何安裝者：照新 README 走純 `cp` 流程即可
+- 已 v0.9.0 setup symlink 的使用者（如果有）：可以保留 symlink（仍然能跑），或 `rm + cp` 改回普通檔案
+
 ## [v0.9.0] — 2026-06-12
 
 ### 結構調整：SKILL.md 移到 `.claude/skills/diet-coach/SKILL.md`
