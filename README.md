@@ -36,7 +36,7 @@
 
 | 檔案 | 用途 |
 |------|------|
-| `SKILL.md` | Claude Code / Codex skill 設定——行為規則、目標、估算原則 |
+| `.claude/skills/diet-coach/SKILL.md` | Claude Code / Codex skill 設定——行為規則、目標、估算原則 |
 | `diet_log.csv` | 模板：逐餐營養記錄 |
 | `food_reference.csv` | 模板：食品資料庫（可從照片自動累積；公版內建台灣食藥署 2,160 筆） |
 | `weight_log.csv` | 模板：體重/體脂歷史記錄（header only） |
@@ -72,16 +72,20 @@ cp ~/diet-coach-template/weight_log.csv ~/diet-coach/
 cp ~/diet-coach-template/food_reference.csv ~/diet-coach/
 cp -r ~/diet-coach-template/scripts ~/diet-coach/
 
-# 4. 把 SKILL.md 放到 Claude Code skills 目錄
-mkdir -p ~/.claude/skills/diet-coach
-cp ~/diet-coach-template/SKILL.md ~/.claude/skills/diet-coach/SKILL.md
+# 4. 把 SKILL.md 鏈到 Claude Code skills 目錄（symlink，未來 git pull 自動同步）
+mkdir -p ~/.claude/skills
+ln -sfn ~/diet-coach-template/.claude/skills/diet-coach ~/.claude/skills/diet-coach
 ```
 
 5. 設定 Telegram（見下方教學）
 6. 第一次 DM bot：Claude 會逐項詢問身高、體重、體脂、目標等，回完自動 backfill 到 SKILL.md。**不需要手動編輯**。
 7. 之後傳食物照片或描述，Claude 直接估算記錄
 
-> SKILL.md 預設路徑為 `~/diet-coach/`。若你用其他位置（例：`~/Dropbox/diet-coach/`），請全文搜尋取代 `~/diet-coach/` 為你的實際路徑。
+> SKILL.md 內預設的資料目錄是 `~/diet-coach/`。若你用其他位置（例：`~/Dropbox/diet-coach/`），請全文搜尋取代為你的實際路徑。
+>
+> **Symlink trade-off**：用 symlink 的話 `git pull` 後新版 SKILL.md 自動生效，但你的 backfill 也會寫進 template repo（被 git 追蹤）。`git pull` 前先 commit 或 stash 你的 backfill 變更。
+>
+> 不想處理 git 衝突？把 step 4 的 `ln -sfn` 改成 `cp`，每次升級時手動 `cp` 過去並重 backfill。
 
 ## Telegram 設置
 
@@ -248,19 +252,30 @@ Bot: 估算結果（誤差 ±15-20%）
 
 ## 升級
 
+**Symlink 安裝者**（推薦版）：
+
 ```bash
-# 1. 拉取最新 template
+# 1. 先備份你的 SKILL.md（含 backfill 過的個人資料）
+cp ~/diet-coach-template/.claude/skills/diet-coach/SKILL.md /tmp/SKILL.md.backup
+
+# 2. 拉取最新 template；若 SKILL.md 有衝突，把備份的「使用者背景」與「NG 上限」貼回
 cd ~/diet-coach-template && git pull origin main
 
-# 2. 看 CHANGELOG 找 Migration 區段
+# 3. 看 CHANGELOG 找 Migration 區段
 less CHANGELOG.md
 
-# 3. 同步 SKILL.md（重要：個人化欄位會被覆蓋，先備份）
-cp ~/.claude/skills/diet-coach/SKILL.md /tmp/SKILL.md.backup
-cp ~/diet-coach-template/SKILL.md ~/.claude/skills/diet-coach/SKILL.md
-# 手動把備份裡的「使用者背景」與「NG 食物閾值」貼回新 SKILL.md
+# 4. 同步 helpers 到你的資料夾（無個人資料，直接覆蓋）
+cp -r ~/diet-coach-template/scripts ~/diet-coach/
+```
 
-# 4. 同步 helpers（無個人資料，直接覆蓋）
+**Copy 安裝者**：
+
+```bash
+cd ~/diet-coach-template && git pull origin main
+less CHANGELOG.md
+cp ~/.claude/skills/diet-coach/SKILL.md /tmp/SKILL.md.backup
+cp ~/diet-coach-template/.claude/skills/diet-coach/SKILL.md ~/.claude/skills/diet-coach/SKILL.md
+# 手動把備份裡的「使用者背景」與「NG 食物閾值」貼回新 SKILL.md
 cp -r ~/diet-coach-template/scripts ~/diet-coach/
 ```
 
@@ -304,7 +319,7 @@ v1.x 可以新增可選欄位（append-only），但**不會**：
 ## Troubleshooting
 
 ### Claude session 沒讀到 skill
-- 確認 `~/.claude/skills/diet-coach/SKILL.md` 存在（**不是** `~/.claude/skills/SKILL.md` 或 `~/diet-coach/SKILL.md`）
+- 確認 `~/.claude/skills/diet-coach/SKILL.md` 存在（**不是** `~/.claude/skills/SKILL.md` 或 `~/diet-coach/SKILL.md`）。若用 symlink：`readlink ~/.claude/skills/diet-coach` 應指向 `~/diet-coach-template/.claude/skills/diet-coach`
 - 重啟 Claude Code session（skill 是 session 啟動時載入）
 - ctb 啟動時印的工作目錄是否為 `~/diet-coach`？若否，`cd ~/diet-coach && ctb`
 

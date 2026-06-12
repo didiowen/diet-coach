@@ -1,5 +1,25 @@
 # Changelog
 
+## [v0.9.0] — 2026-06-12
+
+### 結構調整：SKILL.md 移到 `.claude/skills/diet-coach/SKILL.md`
+
+讓 repo 直接對齊 Claude Code 的 skill 目錄慣例，使用者可以用 symlink 一次性掛到本機，未來 `git pull` 自動同步新版 SKILL.md，省去手動 `cp` 步驟。
+
+### 改進
+
+- **`SKILL.md` → `.claude/skills/diet-coach/SKILL.md`**：repo 結構直接對齊 Claude Code 慣用 layout
+- **README 安裝步驟**：原本 `mkdir + cp` 改成 `ln -sfn` symlink。明示 trade-off（git pull 自動更新 vs. backfill 寫進 template repo 需處理 git 衝突）；提供 `cp` fallback
+- **README 升級段**：分成 symlink 安裝者（先備份 SKILL.md → git pull → 解衝突）與 copy 安裝者（git pull → cp 覆蓋 → 手動 backfill）兩條路徑
+- **檔案說明 table**：SKILL.md 路徑欄位同步更新
+- **Troubleshooting**：「Claude session 沒讀到 skill」加 symlink 驗證指令 `readlink`
+
+### Migration
+
+- **既有 cp 安裝者**：不受影響，繼續用 cp 流程
+- **想轉成 symlink**：先 `rm ~/.claude/skills/diet-coach/SKILL.md`（**先備份**！），再 `ln -sfn ~/diet-coach-template/.claude/skills/diet-coach ~/.claude/skills/diet-coach`
+- **SKILL.md 內容本身不變**：行為規則、觸發條件、helper 呼叫等與 v0.8.0 完全相同
+
 ## [v0.8.0] — 2026-06-12
 
 ### 新功能：首次啟動自動 onboarding，不再需要手動編輯 SKILL.md
