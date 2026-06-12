@@ -1,5 +1,17 @@
 # Changelog
 
+## [v0.7.1] — 2026-06-12
+
+### 改進（README tone polish + storage 概念修正）
+
+- **README tagline / 功能 / 運作方式 / 注意事項 四段 tone 順過**：從「auto-estimates macros」這種 feature 描述改成 user-framed 框架（例：「記飲食三天就放棄的人專用」、「沒人會看到你昨天吃什麼」）。不動結構、安裝步驟、Telegram setup、Troubleshooting、Schema 鎖死宣告、walkthrough。
+- **「自動重算 BMR/TDEE」段拿掉 "Mifflin-St Jeor" 公式名稱**：實際 helper script 內含兩套（有 body-fat-pct 用 Katch-McArdle、否則 fallback Mifflin-St Jeor），README 寫死單一公式會誤導。
+- **運作方式 step 3 解綁 git**：原本「CSV append + 對照當日目標 + git commit/push」假設使用者一定走私有 git repo。改成 storage-agnostic 步驟 + 下方明列兩條儲存路徑：私有 git repo（自動 commit/push）或 Google Drive / iCloud / Dropbox 同步資料夾（OS 自動同步），並提示 Claude/Codex 可以幫忙設定。
+
+### Migration
+
+無 breaking change。純文件改動，helper scripts 與 CSV schema 不受影響。
+
 ## [v0.7.0] — 2026-06-12
 
 ### 新增（README 文件補完）
