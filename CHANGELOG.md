@@ -1,5 +1,29 @@
 # Changelog
 
+## [v0.8.0] — 2026-06-12
+
+### 新功能：首次啟動自動 onboarding，不再需要手動編輯 SKILL.md
+
+過去的安裝步驟最後一關卡在「自己打開 SKILL.md 把 `<your_gender>` 等 placeholder 換成實際資料」。對非工程背景的使用者是個明顯的 friction。
+
+從這版起：
+
+- **SKILL.md 加入觸發條件**：session 啟動時先檢查「使用者背景」段是否仍含 `<your_*>` placeholder。若是 → 進入初始設定流程；若否 → 直接進估算流程。
+- **詢問流程明確化**：7 題（基本資料、體脂、訓練頻率、活動量、目標、飲食偏好、NG 上限），一次到位。
+- **自動回填**：使用者回「確認」後，Claude 用 Edit 工具把 SKILL.md 的「使用者背景」段所有 `<your_*>` 與「NG 食物管理」段兩處 `<your_threshold>` 取代成實際值。
+- **README 安裝步驟移除「手動編輯 SKILL.md」一條**，改成「第一次 DM bot：Claude 會問完並自動 backfill」。
+- **README walkthrough 新增「首次 DM（自動 onboarding）」對話範例**，讓新使用者預期 bot 的首次互動樣貌。
+
+### 為何重要
+
+從技術 template 轉變成「裝完就能用」的工具——只需要複製檔案 + 設定 Telegram + DM bot 一次，全程不用打開 SKILL.md。這是 v1.0「外部使用者驗證」必要條件的鋪墊。
+
+### Migration
+
+- 既有使用者已手動填過 SKILL.md，不受影響（觸發條件偵測不到 placeholder → 不會重跑 onboarding）。
+- 新使用者照新 README 安裝即可，不需要做任何 SKILL.md 改動。
+- SKILL.md 位於全域 `~/.claude/skills/diet-coach/`，**不**會跟資料目錄一起同步——換機器時整個 `~/.claude/skills/diet-coach/` 一起搬過去。
+
 ## [v0.7.1] — 2026-06-12
 
 ### 改進（README tone polish + storage 概念修正）
