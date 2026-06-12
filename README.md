@@ -5,23 +5,25 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill%20Based-blueviolet?logo=anthropic)](https://claude.ai/claude-code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-透過 Telegram 傳送食物照片或文字，讓 Claude Code 或 Codex 自動估算熱量和巨量營養素，並記錄到本地 CSV 檔。
+一個用 Telegram 跟 Claude 對話的飲食日記。傳張食物照片或文字描述，bot 幫你估熱量與蛋白質／碳水／脂肪，寫進本地 CSV——記飲食三天就放棄的人專用。
 
 ## 功能
 
-- 辨識台灣常見料理（便當、自助餐、夜市、超商）
-- 二段式每日目標：訓練日 / 休息日分開設定
-- 從照片自動讀取營養標示 → 寫入 `food_reference.csv`
-- 估算時考慮烹調方式（炒油、油炸等）影響
-- 給範圍而非假精確值
-- NG食物週計數：7天內超過設定次數自動嚴厲提醒
-- 體重追蹤：每2週自動提醒量體重，回報後以 Mifflin-St Jeor 重算 BMR/TDEE，確認後更新目標
+- 認得台灣食物——便當、自助餐、夜市、超商，不是只懂 western salad
+- 訓練日與休息日分開設目標，跟你練的節奏一致
+- 傳一張包裝營養標示照，自動累積進 `food_reference.csv`
+- 烹調方式（炒油、油炸、勾芡）會算進熱量誤差
+- 給範圍，不給假精確值——±15–20% 是誠實
+- NG 食物（甜點、手搖飲）超過你設的週上限，bot 會嚴厲嘲諷
+- 兩週沒量體重就提醒，回報後自動以 Mifflin-St Jeor 重算 BMR/TDEE，確認後更新目標
 
 ## 運作方式
 
-1. 透過 Telegram bot 傳送食物照片或文字描述
-2. Claude 或 Codex 讀取 `SKILL.md`，估算營養素（附誤差範圍），必要時主動詢問
-3. 結果 append 到 `diet_log.csv`，並 git commit / push
+1. Telegram DM 傳食物照片或文字描述
+2. Claude / Codex 讀取 `SKILL.md`，估算營養素並主動問清楚（油量、份量、醬料）
+3. CSV append + 對照當日目標 + git commit/push
+
+想看實際對話的樣子，跳到 [第一日 walkthrough](#第一日-walkthrough)。
 
 ## 檔案說明
 
@@ -293,7 +295,7 @@ chmod +x ~/diet-coach/scripts/*.py
 
 ## 注意事項
 
-- 估算值誤差約 ±15–20%，外食尤其如此
-- `diet_log.csv`、`weight_log.csv` 實際內容含個人健康資料，建議放私有 repo 或 Google Drive
-- 公版 repo 不含個人資料，純為模板與 helper scripts
-- 歡迎共同維護 `food_reference.csv`
+- 誤差約 ±15–20%，外食尤其如此。這套不取代營養師，是個誠實的飲食日記
+- 你的 `diet_log.csv` 與 `weight_log.csv` 是個人健康資料——放私有 repo 或 Google Drive，別 push 上來
+- 公版只放模板與 helper scripts，沒人會看到你昨天吃什麼
+- 想貢獻品牌包裝食品資料？來 [CONTRIBUTING.md](CONTRIBUTING.md)
