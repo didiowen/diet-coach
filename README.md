@@ -15,13 +15,20 @@
 - 烹調方式（炒油、油炸、勾芡）會算進熱量誤差
 - 給範圍，不給假精確值——±15–20% 是誠實
 - NG 食物（甜點、手搖飲）超過你設的週上限，bot 會嚴厲嘲諷
-- 兩週沒量體重就提醒，回報後自動以 Mifflin-St Jeor 重算 BMR/TDEE，確認後更新目標
+- 兩週沒量體重就提醒，回報後自動重算 BMR/TDEE，確認後更新目標
 
 ## 運作方式
 
 1. Telegram DM 傳食物照片或文字描述
 2. Claude / Codex 讀取 `SKILL.md`，估算營養素並主動問清楚（油量、份量、醬料）
-3. CSV append + 對照當日目標 + git commit/push
+3. CSV append + 對照當日目標
+
+儲存方式擇一：
+
+- **私有 git repo**：CSV 寫入後 `git add → commit → push`
+- **Google Drive / iCloud / Dropbox 等同步資料夾**：把資料夾路徑指向掛載點，作業系統自動同步，不用 git
+
+兩種都行——關鍵是 SKILL.md 裡的 CSV 路徑指對位置。實際要怎麼跑 Claude/Codex 可以幫你設。
 
 想看實際對話的樣子，跳到 [第一日 walkthrough](#第一日-walkthrough)。
 
