@@ -3,7 +3,9 @@ name: diet-coach
 description: Estimates calories and macros for food (Taiwanese cuisine, restaurants, convenience store, home-cooked, packaged) from photos or descriptions. Outputs structured data ready to append to diet_log.csv. Triggered when user sends a food photo, describes a meal, or asks for nutrition estimation.
 ---
 
-## 使用者背景（範例 — 首次使用請替換為您的資料）
+## 使用者背景
+
+> 首次啟動會自動詢問並回填這段（見下方「初始設定」）。不需要手動編輯。
 
 - 性別：<your_gender>（男/女）
 - 年齡：<your_age> 歲
@@ -29,15 +31,54 @@ description: Estimates calories and macros for food (Taiwanese cuisine, restaura
 
 **CSV 欄位**（不可變動）：date,meal_type,food,calories,protein_g,carb_g,fat_g,training_day,notes
 
-## 初始設定：建立使用者檔案
+## 初始設定（首次啟動自動觸發）
 
-首次使用時，詢問以下資訊以計算 BMR / TDEE：
+### 觸發條件
 
-1. **基本資料**：性別（男/女）、年齡（歲）、身高（cm）、體重（kg）
-2. **訓練頻率**：每週幾次重訓或有氧？
-3. **日常活動量**：久坐（辦公室）/ 輕度（偶爾走動）/ 中度（體力工作）
-4. **目標**：減脂 / 增肌 / 維持體重
-5. **飲食偏好**：高蛋白 / 低脂 / 素食 / 過敏食物
+每次 session 啟動時先讀本 SKILL.md「使用者背景」區塊。
+- 仍含 `<your_*>` placeholder（如 `<your_gender>`）→ 進入初始設定流程
+- 已是實際資料 → 跳過，直接進入估算流程
+
+### 詢問流程
+
+依序問完（一次到位，不分批）：
+
+1. **基本資料**：性別（男/女）、年齡、身高（cm）、體重（kg）
+2. **體脂**（可留空；有就改用 Katch-McArdle 算 BMR）
+3. **訓練頻率**：每週幾次重訓或有氧？
+4. **日常活動量**：久坐 / 輕度 / 中度 / 重度
+5. **目標**：減脂 / 增肌 / 維持
+6. **飲食偏好或過敏**：低脂高蛋白 / 素食 / 過敏食物 / 無
+7. **NG 食物週上限**：每週幾次甜點/手搖飲/挫冰算「超標」（建議 3）
+
+收完後依「BMR / TDEE 計算」段呼叫 `bmr-tdee.py` 算 BMR/TDEE，依目標套出訓練日/休息日二段式營養目標。
+
+### 確認 + 回填
+
+把結果寫成確認摘要：
+
+```
+使用者背景已建立：
+- M/30/175｜70 kg｜體脂 18%
+- BMR 1700｜TDEE 2635（PAL 1.55）
+- 目標：減脂
+- 訓練日：熱量 2240｜P 140｜C 250｜F 70
+- 休息日：熱量 1990｜P 140｜C 180｜F 75
+- NG 上限：3 次/週
+
+回覆「確認」即寫入 SKILL.md。
+```
+
+使用者回「確認」後，用 Edit 工具把本 SKILL.md：
+
+1. 「使用者背景」段所有 `<your_*>` placeholder 取代成實際值
+2. 「NG 食物管理」段兩處 `<your_threshold>` 取代成 NG 上限數字
+
+回報「已建立，往後傳食物或描述就直接記錄」。
+
+回「不對」或要改的項目：修正後重新確認。
+
+> 註：SKILL.md 位於 `~/.claude/skills/diet-coach/SKILL.md`（Claude Code skill 全域目錄）。它**不會**跟你的資料夾 (`~/diet-coach/`) 一起同步——換機器時請把整個 `~/.claude/skills/diet-coach/` 也搬過去。
 
 ## BMR / TDEE 計算
 
