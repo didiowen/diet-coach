@@ -248,7 +248,7 @@ python3 ~/diet-coach/scripts/food-ref-append.py \
 
 ### 檔案
 - weight_log.csv：`~/diet-coach/weight_log.csv`（或自訂）
-- 欄位：`date,weight_kg,body_fat_pct,notes`（body_fat_pct 可留空）
+- 欄位：`date,height_cm,weight_kg,body_fat_pct,bmr,tdee,pal,notes`（每筆是身高/體重/體脂 + 計算出的 BMR/TDEE/PAL 快照）
 
 ### 提醒機制
 每次食物記錄後，讀取 weight_log.csv 最後一筆日期：
@@ -292,6 +292,11 @@ BMR：XXX kcal｜TDEE：XXX kcal
 ```
 
 ### 確認後動作
-1. Append 新條目到 weight_log.csv
+1. 呼叫 helper 寫入（自動重算 PAL ＋ BMR/TDEE、原子 append 8 欄列到 `weight_log.csv`，**絕不**手動 Edit）：
+   ```sh
+   ~/diet-coach/scripts/weight-log-append.py --dir ~/diet-coach \
+     --weight <kg> [--body-fat-pct <pct>] [--height-cm <cm> --age <yr> --gender female|male] [--notes "..."]
+   ```
+   有體脂走 Katch-McArdle（免年齡性別）；無體脂才需 height/age/gender。
 2. 更新 SKILL.md「營養目標」區塊數值，並在標題後標記版本日期（例：`版本 2026-06-22`）
 3. (optional) `git add weight_log.csv` + SKILL.md → commit → push（同一 commit）

@@ -39,11 +39,13 @@
 | `.claude/skills/diet-coach/SKILL.md` | canonical spec——行為規則、目標、估算原則。可裝成 skill（`/diet-coach`）或工作目錄 `CLAUDE.md`，見[安裝步驟](#安裝步驟) |
 | `diet_log.csv` | 模板：逐餐營養記錄 |
 | `food_reference.csv` | 模板：食品資料庫（可從照片自動累積；公版內建台灣食藥署 2,160 筆） |
-| `weight_log.csv` | 模板：體重/體脂歷史記錄（header only） |
+| `weight_log.csv` | 模板：體重/代謝快照（8 欄：`date,height_cm,weight_kg,body_fat_pct,bmr,tdee,pal,notes`） |
 | `scripts/bmr-tdee.py` | BMR/TDEE 計算（Katch-McArdle 或 Mifflin-St Jeor） |
 | `scripts/diet-summary.py` | 當日累計 kcal/P/C/F 從 `diet_log.csv` 加總 |
 | `scripts/pal-from-log.py` | 從 `diet_log.csv` 過去 N 天訓練頻率推薦 PAL |
 | `scripts/food-ref-append.py` | 並發安全 append `food_reference.csv`（`fcntl.flock` + dedupe） |
+| `scripts/weight-log-append.py` | 算 PAL+BMR/TDEE 並原子 append `weight_log.csv`（單人）或 `weight_log_<slug>.csv`（群組） |
+| `group/` | 多人問責群組模板：`CLAUDE.md`、`members.example.json`、`AGENTS.md`（見[多人問責群組模式](#多人問責群組模式group-accountability)） |
 
 ## CSV 欄位
 
@@ -254,6 +256,23 @@ Bot: 估算結果（誤差 ±15-20%）
 
 回報體重時（例：「體重 54.5 體脂 22」）會觸發 BMR/TDEE 重算，顯示確認摘要等你回「確認」才寫入。
 
+## 多人問責群組模式（group accountability）
+
+想用「群體力量＋羞恥心」做飲食控制？把多名成員放進同一個 Telegram 群組，bot 各自估算、各記各的檔，超標就在群裡「公開點名」。
+
+**需求**：用 [diet-coach-bot](https://github.com/didiowen/diet-coach-bot)（≥ `v1.6.6-diet.1`）跑——它會把群組訊息自動標上發話者（`[group message from <name> (telegram_id:<id>)]`），多人版 spec 才能把每則食物歸到正確的人；身分以驗證過的數字 `telegram_id` 為準、有防偽（避免成員互相栽贓）。
+
+**設定**：
+1. 建一個群組工作目錄（例 `~/diet-group/`），把 `group/CLAUDE.md` 放成它的 `CLAUDE.md`。
+2. `cp group/members.example.json ~/diet-group/members.json`，填入每位成員的 `telegram_id` → `slug` / `name` /（可選）`height_cm`/`age`/`gender`。
+3. 每位成員建 `diet_log_<slug>.csv` 與 `weight_log_<slug>.csv`（header 同單人版 / 8 欄）；把 `scripts/` 複製或指過去。
+4. 在那個工作目錄跑 diet-coach-bot：新 bot token、`TELEGRAM_ALLOWED_USERS` 含全體成員 user_id、`ALLOWED_PATHS` 含工作目錄。
+5. BotFather `/setprivacy` → Disable，建 Telegram 群組把 bot ＋ 成員拉進去。
+
+成員傳食物 → bot 公開估算 ＋ 寫各自的檔；連續 NG（預設 7 天 >5 次）→ 群裡公開嘲諷那個人。體重回報 → `weight-log-append.py --slug <slug>` 記代謝快照。
+
+> 隱私提醒：群組模式「刻意公開」彼此的飲食（這就是問責機制）。只把信任、同意被公開的人放進去。
+
 ## 升級
 
 ```bash
@@ -296,7 +315,7 @@ food_name, source, serving_size_g, calories, protein_g, carb_g, fat_g, notes
 
 **weight_log.csv**
 ```
-date, weight_kg, body_fat_pct, notes
+date, height_cm, weight_kg, body_fat_pct, bmr, tdee, pal, notes
 ```
 
 v1.x 可以新增可選欄位（append-only），但**不會**：

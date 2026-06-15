@@ -1,5 +1,17 @@
 # Changelog
 
+## [v0.10.0] — 2026-06-15
+
+### ✨ 新功能：多人問責群組模式 + 代謝體重追蹤
+
+- **多人問責群組（group accountability）**：新增 `group/`（`CLAUDE.md` 多人版 spec、`members.example.json`、`AGENTS.md`）。多名成員在同一個 Telegram 群組各記各的飲食、bot 公開估算、超標公開點名（羞恥心問責）。需搭配 [diet-coach-bot](https://github.com/didiowen/diet-coach-bot) ≥ `v1.6.6-diet.1`（提供群組 sender tag ＋ 防偽）；成員依驗證過的數字 `telegram_id` 歸人。
+- **代謝體重追蹤**：新增 `scripts/weight-log-append.py`——回報體重/體脂時自動算 PAL（從 diet_log 訓練頻率）＋ BMR/TDEE（有體脂 Katch-McArdle、否則 Mifflin），原子（flock）append。單人寫 `weight_log.csv`、群組 `--slug` 寫 `weight_log_<slug>.csv`。
+
+### ⚠️ Breaking：weight_log.csv schema 升級
+- `weight_log.csv` 從 4 欄 `date,weight_kg,body_fat_pct,notes` → 8 欄 `date,height_cm,weight_kg,body_fat_pct,bmr,tdee,pal,notes`（仍在 0.x；schema-lock 承諾自 v1.x 起才生效）。
+- **Migration**：既有 4 欄 weight_log——開一個新檔用 8 欄 header，舊資料用 `weight-log-append.py` 逐筆補回（自動算 BMR/TDEE/PAL）；或保留舊檔，但 SKILL.md 體重流程已改用新 helper / schema。
+- SKILL.md「確認後動作」改為呼叫 `weight-log-append.py`（取代手動 append）。
+
 ## [v0.9.2] — 2026-06-15
 
 ### 改進
