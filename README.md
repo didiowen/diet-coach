@@ -260,14 +260,16 @@ Bot: 估算結果（誤差 ±15-20%）
 
 想用「群體力量＋羞恥心」做飲食控制？把多名成員放進同一個 Telegram 群組，bot 各自估算、各記各的檔，超標就在群裡「公開點名」。
 
-**需求**：用 [diet-coach-bot](https://github.com/didiowen/diet-coach-bot)（≥ `v1.6.6-diet.1`）跑——它會把群組訊息自動標上發話者（`[group message from <name> (telegram_id:<id>)]`），多人版 spec 才能把每則食物歸到正確的人；身分以驗證過的數字 `telegram_id` 為準、有防偽（避免成員互相栽贓）。
+**需求**：用 [diet-coach-bot](https://github.com/didiowen/diet-coach-bot)（≥ `v1.6.6-diet.2`）跑——它會把群組訊息自動標上發話者（`[group message from <name> (telegram_id:<id>)]`），多人版 spec 才能把每則食物歸到正確的人；身分以驗證過的數字 `telegram_id` 為準、有防偽（避免成員互相栽贓）。
 
 **設定**：
 1. 建一個群組工作目錄（例 `~/diet-group/`），把 `group/CLAUDE.md` 放成它的 `CLAUDE.md`。（可選）把 `group/WELCOME.md` 放成工作目錄的 `WELCOME.md`——新成員第一次傳訊息時 bot 會 verbatim 貼出來當 onboarding／公開揭露（記得改最後一行的管理員聯絡方式）。
 2. `cp group/members.example.json ~/diet-group/members.json`，填入每位成員的 `telegram_id` → `slug` / `name` /（可選）`height_cm`/`age`/`gender`。
 3. 每位成員建 `diet_log_<slug>.csv` 與 `weight_log_<slug>.csv`（header 同單人版 / 8 欄）；把 `scripts/` 複製或指過去。
-4. 在那個工作目錄跑 diet-coach-bot：新 bot token、`TELEGRAM_ALLOWED_USERS` 含全體成員 user_id、`ALLOWED_PATHS` 含工作目錄。
-5. BotFather `/setprivacy` → Disable，建 Telegram 群組把 bot ＋ 成員拉進去。
+4. 在那個工作目錄跑 diet-coach-bot 的 `.env`：新 bot token、`TELEGRAM_ALLOWED_USERS` 含全體成員 user_id、`ALLOWED_PATHS` 含工作目錄，並設 **`CTB_GROUP_AUTO_RESPOND=1`**（讓 bot 對群裡「每則訊息」都回、免 @mention；配合多人版 spec「只回食物/體重、純閒聊保持安靜」。接受 `1`/`true`/`yes`）。
+5. BotFather `/setprivacy` → **Disable**（否則群裡沒 @ 的訊息根本不會送到 bot；改完要把 bot「移出再加回」群組才生效），再建 Telegram 群組把 bot ＋ 成員拉進去。
+
+> 「沒 @ 也能丟照片就記」需要三件事到齊：① privacy **Disable**（bot 收得到訊息）② **`CTB_GROUP_AUTO_RESPOND=1`**（免 @ 回應）③ diet-coach-bot ≥ `v1.6.6-diet.2`（照片 caption 的 @mention 偵測 ＋ 上述 flag）。
 
 成員傳食物 → bot 公開估算 ＋ 寫各自的檔；連續 NG（預設 7 天 >5 次）→ 群裡公開嘲諷那個人。體重回報 → `weight-log-append.py --slug <slug>` 記代謝快照。
 

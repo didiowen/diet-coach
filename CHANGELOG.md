@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.10.1] — 2026-06-15
+
+### 文件 / 群組可用性
+- README 群組設定加入 **`CTB_GROUP_AUTO_RESPOND=1`** 說明（bot 對群裡每則訊息免 @mention 回應）＋ privacy Disable 的「移出再加回群組」注意事項；diet-coach-bot 版本需求升到 ≥ `v1.6.6-diet.2`（含群組照片 caption @mention 偵測修正 ＋ 該 flag）。
+- `group/CLAUDE.md` 加「何時回應（auto-respond 模式）」：只回食物/體重、純閒聊保持安靜。
+
 ## [v0.10.0] — 2026-06-15
 
 ### ✨ 新功能：多人問責群組模式 + 代謝體重追蹤
