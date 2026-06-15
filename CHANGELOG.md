@@ -1,5 +1,20 @@
 # Changelog
 
+## [v0.9.2] — 2026-06-15
+
+### 改進
+
+- **新增「工作目錄 CLAUDE.md」安裝模式**：README 安裝步驟改為兩種模式擇一——
+  - 模式 A｜Skill：放進 `~/.claude/skills/diet-coach/SKILL.md`，用 `/diet-coach`（官方 MCP plugin 適用）
+  - 模式 B｜工作目錄：把同一份 spec 放成 bot 工作目錄的 `CLAUDE.md`，Agent SDK 開機自動載入、免打 `/diet-coach`（ctb 等適用）
+- canonical spec 仍是單一檔（`.claude/skills/diet-coach/SKILL.md`），兩模式共用同內容，避免雙檔 drift。檔案含 YAML frontmatter：當 SKILL.md 可註冊 skill，當 CLAUDE.md frontmatter 無害。
+- `AGENTS.md` 改為指向「`CLAUDE.md` 或 `SKILL.md`（讀存在者）」，同時支援兩模式的 Codex 使用者。
+
+### Migration
+
+- 既有 Skill 安裝者不受影響，照舊可用。
+- 想改工作目錄模式：把 spec 複製成 `<工作目錄>/CLAUDE.md`（見 README 安裝步驟模式 B）。
+
 ## [v0.9.1] — 2026-06-12
 
 ### 改進

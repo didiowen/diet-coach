@@ -20,7 +20,7 @@
 ## 運作方式
 
 1. Telegram DM 傳食物照片或文字描述
-2. Claude / Codex 讀取 `SKILL.md`，估算營養素並主動問清楚（油量、份量、醬料）
+2. Claude / Codex 讀取 spec（`SKILL.md` 或 `CLAUDE.md`），估算營養素並主動問清楚（油量、份量、醬料）
 3. CSV append + 對照當日目標
 
 儲存方式擇一：
@@ -28,7 +28,7 @@
 - **私有 git repo**：CSV 寫入後 `git add → commit → push`
 - **Google Drive / iCloud / Dropbox 等同步資料夾**：把資料夾路徑指向掛載點，作業系統自動同步，不用 git
 
-兩種都行——關鍵是 SKILL.md 裡的 CSV 路徑指對位置。實際要怎麼跑 Claude/Codex 可以幫你設。
+兩種都行——關鍵是 spec 裡的 CSV 路徑指對位置。實際要怎麼跑 Claude/Codex 可以幫你設。
 
 想看實際對話的樣子，跳到 [第一日 walkthrough](#第一日-walkthrough)。
 
@@ -36,7 +36,7 @@
 
 | 檔案 | 用途 |
 |------|------|
-| `.claude/skills/diet-coach/SKILL.md` | Claude Code / Codex skill 設定——行為規則、目標、估算原則 |
+| `.claude/skills/diet-coach/SKILL.md` | canonical spec——行為規則、目標、估算原則。可裝成 skill（`/diet-coach`）或工作目錄 `CLAUDE.md`，見[安裝步驟](#安裝步驟) |
 | `diet_log.csv` | 模板：逐餐營養記錄 |
 | `food_reference.csv` | 模板：食品資料庫（可從照片自動累積；公版內建台灣食藥署 2,160 筆） |
 | `weight_log.csv` | 模板：體重/體脂歷史記錄（header only） |
@@ -72,16 +72,24 @@ cp ~/diet-coach-template/weight_log.csv ~/diet-coach/
 cp ~/diet-coach-template/food_reference.csv ~/diet-coach/
 cp -r ~/diet-coach-template/scripts ~/diet-coach/
 
-# 4. 把 SKILL.md 複製到 Claude Code skills 目錄
+# 4. 安裝 spec 檔 —— 兩種模式擇一（同一份檔，內容一樣，只差怎麼被載入）
+
+#   模式 A｜Skill：想用 /diet-coach、官方 MCP plugin 使用者
 mkdir -p ~/.claude/skills/diet-coach
 cp ~/diet-coach-template/.claude/skills/diet-coach/SKILL.md ~/.claude/skills/diet-coach/SKILL.md
+#   （想自動跟 template 同步，可改用 symlink：
+#    ln -sfn ~/diet-coach-template/.claude/skills/diet-coach ~/.claude/skills/diet-coach）
+
+#   模式 B｜工作目錄：ctb 等 Agent SDK，開機自動載入、免打 /diet-coach
+#   把同一份 spec 放成 bot 工作目錄下的 CLAUDE.md（前置 YAML frontmatter 在此無害）
+cp ~/diet-coach-template/.claude/skills/diet-coach/SKILL.md ~/diet-coach/CLAUDE.md
 ```
 
 5. 設定 Telegram（見下方教學）
-6. 第一次 DM bot：Claude 會逐項詢問身高、體重、體脂、目標等，回完自動 backfill 到 SKILL.md。**不需要手動編輯**。
+6. 第一次 DM bot：Claude 會逐項詢問身高、體重、體脂、目標等，回完自動 backfill 到你的 spec 檔（SKILL.md 或 CLAUDE.md）。**不需要手動編輯**。
 7. 之後傳食物照片或描述，Claude 直接估算記錄
 
-> SKILL.md 內預設的資料目錄是 `~/diet-coach/`。若你用其他位置（例：`~/Dropbox/diet-coach/`），請全文搜尋取代為你的實際路徑。
+> spec 檔（SKILL.md / CLAUDE.md）內預設的資料目錄是 `~/diet-coach/`。若你用其他位置（例：`~/Dropbox/diet-coach/`），請全文搜尋取代為你的實際路徑。
 
 ## Telegram 設置
 
