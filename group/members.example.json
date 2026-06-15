@@ -1,0 +1,4 @@
+{
+  "<telegram_id_1>": { "slug": "alice", "name": "Alice", "height_cm": 165, "age": 30, "gender": "female" },
+  "<telegram_id_2>": { "slug": "bob",   "name": "Bob",   "height_cm": 178, "age": 32, "gender": "male" }
+}
