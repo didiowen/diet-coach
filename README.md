@@ -45,7 +45,7 @@
 | `scripts/pal-from-log.py` | 從 `diet_log.csv` 過去 N 天訓練頻率推薦 PAL |
 | `scripts/food-ref-append.py` | 並發安全 append `food_reference.csv`（`fcntl.flock` + dedupe） |
 | `scripts/weight-log-append.py` | 算 PAL+BMR/TDEE 並原子 append `weight_log.csv`（單人）或 `weight_log_<slug>.csv`（群組） |
-| `group/` | 多人問責群組模板：`CLAUDE.md`、`members.example.json`、`AGENTS.md`（見[多人問責群組模式](#多人問責群組模式group-accountability)） |
+| `group/` | 多人問責群組模板：`CLAUDE.md`、`members.example.json`、`AGENTS.md`、`WELCOME.md`（見[多人問責群組模式](#多人問責群組模式group-accountability)） |
 
 ## CSV 欄位
 
@@ -263,7 +263,7 @@ Bot: 估算結果（誤差 ±15-20%）
 **需求**：用 [diet-coach-bot](https://github.com/didiowen/diet-coach-bot)（≥ `v1.6.6-diet.1`）跑——它會把群組訊息自動標上發話者（`[group message from <name> (telegram_id:<id>)]`），多人版 spec 才能把每則食物歸到正確的人；身分以驗證過的數字 `telegram_id` 為準、有防偽（避免成員互相栽贓）。
 
 **設定**：
-1. 建一個群組工作目錄（例 `~/diet-group/`），把 `group/CLAUDE.md` 放成它的 `CLAUDE.md`。
+1. 建一個群組工作目錄（例 `~/diet-group/`），把 `group/CLAUDE.md` 放成它的 `CLAUDE.md`。（可選）把 `group/WELCOME.md` 放成工作目錄的 `WELCOME.md`——新成員第一次傳訊息時 bot 會 verbatim 貼出來當 onboarding／公開揭露（記得改最後一行的管理員聯絡方式）。
 2. `cp group/members.example.json ~/diet-group/members.json`，填入每位成員的 `telegram_id` → `slug` / `name` /（可選）`height_cm`/`age`/`gender`。
 3. 每位成員建 `diet_log_<slug>.csv` 與 `weight_log_<slug>.csv`（header 同單人版 / 8 欄）；把 `scripts/` 複製或指過去。
 4. 在那個工作目錄跑 diet-coach-bot：新 bot token、`TELEGRAM_ALLOWED_USERS` 含全體成員 user_id、`ALLOWED_PATHS` 含工作目錄。

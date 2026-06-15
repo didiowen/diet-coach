@@ -4,7 +4,7 @@
 
 ### ✨ 新功能：多人問責群組模式 + 代謝體重追蹤
 
-- **多人問責群組（group accountability）**：新增 `group/`（`CLAUDE.md` 多人版 spec、`members.example.json`、`AGENTS.md`）。多名成員在同一個 Telegram 群組各記各的飲食、bot 公開估算、超標公開點名（羞恥心問責）。需搭配 [diet-coach-bot](https://github.com/didiowen/diet-coach-bot) ≥ `v1.6.6-diet.1`（提供群組 sender tag ＋ 防偽）；成員依驗證過的數字 `telegram_id` 歸人。
+- **多人問責群組（group accountability）**：新增 `group/`（`CLAUDE.md` 多人版 spec、`members.example.json`、`AGENTS.md`、`WELCOME.md` onboarding 範本）。多名成員在同一個 Telegram 群組各記各的飲食、bot 公開估算、超標公開點名（羞恥心問責）。需搭配 [diet-coach-bot](https://github.com/didiowen/diet-coach-bot) ≥ `v1.6.6-diet.1`（提供群組 sender tag ＋ 防偽）；成員依驗證過的數字 `telegram_id` 歸人。
 - **代謝體重追蹤**：新增 `scripts/weight-log-append.py`——回報體重/體脂時自動算 PAL（從 diet_log 訓練頻率）＋ BMR/TDEE（有體脂 Katch-McArdle、否則 Mifflin），原子（flock）append。單人寫 `weight_log.csv`、群組 `--slug` 寫 `weight_log_<slug>.csv`。
 
 ### ⚠️ Breaking：weight_log.csv schema 升級
