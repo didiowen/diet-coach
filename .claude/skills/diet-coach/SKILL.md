@@ -230,10 +230,19 @@ grep "^$(date +%Y-%m-%d)" ~/diet-coach/diet_log.csv
 使用者傳送的照片中含有營養標示（包裝背面、便利商店標籤、菜單營養資訊）時，自動讀取標示值並 append 到 `food_reference.csv`。
 
 ### 欄位說明
-`food_name, source, serving_size_g, calories, protein_g, carb_g, fat_g, notes`
-- `source`：品牌或來源（例：7-11、全家、光泉）
+`food_name, source, serving_size_g, calories, protein_g, carb_g, fat_g, notes, calcium_mg, iron_mg`
+- `source`：品牌或來源（例：7-11、全家、光泉、食藥署台灣食品成分資料庫）
 - `serving_size_g`：以公克為單位，若標示為 mL 則直接換算（水類食品 1 mL ≈ 1 g）
 - `notes`：口味、規格或備註（例：原味、大包裝 135g）
+- `calcium_mg` / `iron_mg`：選用，僅在來源有提供時填（食藥署列 per 100g；包裝品項僅在標示有鈣鐵時填），其餘留空、不估算
+
+### 鈣鐵回填（食藥署來源，台灣適用）
+食藥署列的鈣鐵可由 `scripts/backfill-food-ref-minerals.py` 從食藥署食品營養成分資料庫 API 抽取（per 100g、依 `food_name` 比對）：
+
+```sh
+python3 scripts/backfill-food-ref-minerals.py            # dry-run 預覽
+python3 scripts/backfill-food-ref-minerals.py --apply    # 寫入
+```
 
 ### 優先順序
 1. 有 reference 值 → 直接採用，標註來源

@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.14.0] — 2026-06-16
+
+### ✨ 新功能：食藥署鈣鐵回填 + food_reference 鈣鐵欄
+
+- **food_reference.csv 新增 `calcium_mg,iron_mg` 兩欄**（選用，僅在來源提供時填，其餘留空不估算）。
+- **新增 `scripts/backfill-food-ref-minerals.py`**：從食藥署食品營養成分資料庫 API（data.gov.tw dataset 8543 / InfoId=20）抽取鈣鐵（per 100g），依 `food_name` 比對回填 food_reference 的食藥署列。dry-run 預設、原子寫入、後綴模糊比對 fallback。本次回填 2096／2160 列（97%）。
+- **`food-ref-append.py` 新增選用 `--calcium-mg` / `--iron-mg`**：不填則留空，向後相容（既有 8 參數呼叫不受影響）。
+- 與 `diet_log` 的 `calcium_mg`/`iron_mg` 串接：詢問微量營養素是否足夠時，食物來源（diet_log）＋ 保健品（supplement_log）合併對照 DRI（見 SKILL.md「微量營養素參考值」）。
+
 ## [v0.13.0] — 2026-06-16
 
 ### ✨ 新功能：微量營養素參考值（DRI 對照）

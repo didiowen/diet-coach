@@ -37,11 +37,15 @@ CSV_PATH = Path(os.environ.get(
     "DIET_COACH_FOOD_REF",
     str(Path.home() / "diet-coach" / "food_reference.csv"),
 ))
-FIELDS = [
+REQUIRED_FIELDS = [
     "food_name", "source", "serving_size_g", "calories",
     "protein_g", "carb_g", "fat_g", "notes",
 ]
+# Micronutrients: optional, only filled when a label/DB provides them (else "").
+OPTIONAL_FIELDS = ["calcium_mg", "iron_mg"]
+FIELDS = REQUIRED_FIELDS + OPTIONAL_FIELDS
 NUMERIC_FIELDS = ["serving_size_g", "calories", "protein_g", "carb_g", "fat_g"]
+OPTIONAL_NUMERIC_FIELDS = ["calcium_mg", "iron_mg"]
 
 
 def validate_numeric(row):
@@ -57,6 +61,20 @@ def validate_numeric(row):
             errs.append(f"--{f.replace('_', '-')} is NaN")
         elif v < 0:
             errs.append(f"--{f.replace('_', '-')} {v} must be >= 0")
+    # Optional micronutrients: empty is allowed; validate only when provided.
+    for f in OPTIONAL_NUMERIC_FIELDS:
+        raw = row.get(f, "")
+        if raw == "" or raw is None:
+            continue
+        try:
+            v = float(raw)
+        except ValueError:
+            errs.append(f"--{f.replace('_', '-')} {raw!r} is not a number")
+            continue
+        if v != v:
+            errs.append(f"--{f.replace('_', '-')} is NaN")
+        elif v < 0:
+            errs.append(f"--{f.replace('_', '-')} {v} must be >= 0")
     return errs
 
 
@@ -64,9 +82,12 @@ def main() -> int:
     p = argparse.ArgumentParser(
         description="Atomically append a row to food_reference.csv (flock + dedupe).",
     )
-    for f in FIELDS:
+    for f in REQUIRED_FIELDS:
         p.add_argument(f"--{f.replace('_', '-')}", required=True,
                        help=f"value for {f} column")
+    for f in OPTIONAL_FIELDS:
+        p.add_argument(f"--{f.replace('_', '-')}", default="",
+                       help=f"value for {f} column (optional micronutrient; blank if unknown)")
     args = p.parse_args()
     row = {f: getattr(args, f) for f in FIELDS}
 
