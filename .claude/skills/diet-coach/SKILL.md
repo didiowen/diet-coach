@@ -108,16 +108,24 @@ description: Estimates calories and macros for food (Taiwanese cuisine, restaura
 
 > 參考：[王介立醫師臨床計算器](https://copper0722.com.tw/calculator/topic/body-size-energy/)
 
-### 有重訓/休息日分化的使用者
+### 二段式目標（由 diet-targets.py 推導，不寫死數字）
 
-建議二段式設定（計算後告知使用者）：
+有重訓/休息日分化的使用者，用 `diet-targets.py` 從「最新 TDEE（`weight_log.csv` 最後一筆）＋ goal」即時推導訓練日/休息日目標——量體重重算 TDEE 後目標自動更新，不必手改：
 
-| | 訓練日 | 休息日 |
-|---|---|---|
-| 熱量 | TDEE × 1.05–1.10 | TDEE × 0.85–0.90 |
-| 碳水 | 較高（補充肝醣） | 較低 |
-| 蛋白質 | 體重 × 1.8–2.2 g | 同訓練日（不降） |
-| 脂肪 | 補足剩餘熱量 | 補足剩餘熱量 |
+```sh
+~/diet-coach/scripts/diet-targets.py --dir ~/diet-coach --goal cut|maintain|recomp|bulk
+```
+
+各 goal 套在 TDEE 上的係數（訓練日 / 休息日）：
+
+| goal | 訓練日 | 休息日 | 用途 |
+|---|---|---|---|
+| cut | ×0.90 | ×0.80 | 減脂（週均赤字） |
+| maintain | ×1.00 | ×1.00 | 維持 |
+| recomp | ×1.10 | ×0.90 | 增肌減脂（熱量循環、週均 ≈ 維持） |
+| bulk | ×1.10 | ×1.00 | 增肌 |
+
+蛋白質 2.0–2.2 g/kg、脂肪 0.8–1.0 g/kg、碳水補足熱量餘額。群組版用 `--slug <slug>`，goal 讀 `members.json`。
 
 ### 不可妥協的下限（任何目標都適用）
 
@@ -168,9 +176,10 @@ grep "^$(date +%Y-%m-%d)" ~/diet-coach/diet_log.csv
 
 ```sh
 ~/diet-coach/scripts/diet-summary.py --csv <path-to-diet_log.csv> [--date YYYY-MM-DD]
+~/diet-coach/scripts/diet-targets.py --dir ~/diet-coach --goal <goal>
 ```
 
-回報累計 kcal/P/C/F + 訓練日狀態，再對照當日目標說剩餘預算。
+回報累計 kcal/P/C/F + 訓練日狀態，對照 diet-targets.py 推導的當日目標說剩餘預算。
 
 ## 估算原則
 
@@ -272,23 +281,19 @@ python3 ~/diet-coach/scripts/food-ref-append.py \
    ```
    - 有 body fat pct → Katch-McArdle；否則 fallback Mifflin-St Jeor
    - 從「使用者背景」讀身高、年齡、性別；若任一缺，**先詢問使用者並補入「使用者背景」**，再 invoke script（gender 是 argparse `required`，不能跳過）
-3. 依當前目標（減脂/增肌/維持）計算訓練日/休息日目標：
-   - 減脂：熱量赤字 15–20%；蛋白質 2.0–2.2 g/kg；脂肪下限 0.8 g/kg
-   - 增肌：熱量盈餘 5–10%；蛋白質 1.8–2.0 g/kg
-   - 維持：TDEE ±5%；蛋白質 1.6–2.0 g/kg
-4. 顯示確認摘要，**等使用者回覆「確認」後才寫入**
+3. 顯示確認摘要（BMR/TDEE 用 step 2 的唯讀預覽），**等使用者回覆「確認」後才寫入**。目標一律由 `diet-targets.py` 依 goal 推導，不手算、不改 SKILL.md。
 
 ### 確認摘要格式
 ```
 體重更新：X.X kg（前次 Y.Y kg，差 ±Z.Z）
 體脂：N%（如有）
-BMR：XXX kcal｜TDEE：XXX kcal
+BMR：XXX kcal｜TDEE：XXX kcal｜PAL：X.XXX
 
-建議更新後目標：
-訓練日：熱量 XXXX｜P XX-XX g｜C XX-XX g｜F XX-XX g
-休息日：熱量 XXXX｜P XX-XX g｜C XX-XX g｜F XX-XX g
+當前目標（diet-targets.py，goal=<goal>）：
+訓練日：熱量 XXXX｜P XX-XX g｜C ~XX g｜F XX-XX g
+休息日：熱量 XXXX｜P XX-XX g｜C ~XX g｜F XX-XX g
 
-回覆「確認」即更新目標並寫入。
+回覆「確認」即寫入體重紀錄（目標自動跟著更新）。
 ```
 
 ### 確認後動作
@@ -298,5 +303,5 @@ BMR：XXX kcal｜TDEE：XXX kcal
      --weight <kg> [--body-fat-pct <pct>] [--height-cm <cm> --age <yr> --gender female|male] [--notes "..."]
    ```
    有體脂走 Katch-McArdle（免年齡性別）；無體脂才需 height/age/gender。
-2. 更新 SKILL.md「營養目標」區塊數值，並在標題後標記版本日期（例：`版本 2026-06-22`）
-3. (optional) `git add weight_log.csv` + SKILL.md → commit → push（同一 commit）
+2. 跑 `diet-targets.py --dir ~/diet-coach --goal <goal>` 確認推導後的新目標，回報使用者。
+3. (optional) `git add weight_log.csv` → commit → push。目標是推導的，SKILL.md 無數字可改。
