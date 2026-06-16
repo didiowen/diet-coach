@@ -36,8 +36,9 @@ diet-coach-bot 會在每則群組訊息前自動標上發話者：
 ## 檔案
 
 - `members.json`：成員名冊與 profile（telegram_id → slug / name / height_cm / age / gender）。
-- `diet_log_<slug>.csv`：每位成員一個飲食檔，欄位 `date,meal_type,food,calories,protein_g,carb_g,fat_g,training_day,notes`。
+- `diet_log_<slug>.csv`：每位成員一個飲食檔，欄位 `date,meal_type,food,calories,protein_g,carb_g,fat_g,training_day,notes,calcium_mg,iron_mg`。`calcium_mg`/`iron_mg` 僅在有明確營養標示時填，其餘留空；不可估算無標示食物的鈣鐵值。
 - `weight_log_<slug>.csv`：每位成員一個體重/代謝檔，欄位 `date,height_cm,weight_kg,body_fat_pct,bmr,tdee,pal,notes`。
+- `supplement_log_<slug>.csv`：每位成員一個保健品紀錄檔（選用），欄位 `date,supplement,dose_mg,notes`（見「微量營養素參考值」）。
 - `food_reference.csv`：共用食品參考值（可 symlink 到單一份）。
 
 ## 估算流程
@@ -93,6 +94,48 @@ python3 <path-to>/scripts/diet-targets.py --dir <群組工作目錄> --slug <slu
 ### 必守的誤差告知（不可省）
 - 攝取自估 **±15-20%**，給區間不給假精確；體脂量測噪訊 **±2-3%**，單筆 Δ落雜訊內就直說，看趨勢比看單筆可靠。
 - 只談能量收支與身體組成趨勢，不做訓練/傷病評論。
+
+## 微量營養素參考值
+
+成員詢問保健食品或微量營養素是否足夠時，依此章節判讀。**不主動追蹤**（diet_log 僅鈣鐵兩欄、且只在有標示時填）；僅成員主動詢問時參考。
+
+### 成人每日建議攝取量（19-50 歲）
+
+來源：台灣衛福部 DRIs 第八版（2022）、美國 NASEM DRIs（1997-2011 分批更新）。
+
+| 微量營養素 | 單位 | 台灣 男 | 台灣 女 | 美國 男 | 美國 女 | 備註 |
+|:---|:---:|:---:|:---:|:---:|:---:|:---|
+| 鈣 Calcium | mg | 1000 | 1000 | 1000 | 1000 | 台美相同 |
+| 鐵 Iron | mg | 10 | 15 | 8 | 18 | 美國女性較高（18 mg） |
+| 鋅 Zinc | mg | 15 | 12 | 11 | 8 | 台灣建議量整體較高 |
+| 鎂 Magnesium | mg | 380 | 320 | 400-420 | 310-320 | 美國依年齡細分（19-30/31-50） |
+| 維生素 A | μg | 600 (RE) | 500 (RE) | 900 (RAE) | 700 (RAE) | 台灣單位 RE；美國 RAE |
+| 維生素 C | mg | 100 | 100 | 90 | 75 | 台灣不分男女 100 mg |
+| 維生素 D | μg | 10 (AI) | 10 (AI) | 15 (RDA) | 15 (RDA) | 美國建議較高 |
+| 維生素 E | mg α-TE | 12 | 12 | 15 | 15 | 美國建議較高 |
+| 維生素 K | μg | 120 (AI) | 90 (AI) | 120 (AI) | 90 (AI) | 台美相同 |
+| 維生素 B1 硫胺素 | mg | 1.2 | 0.9 | 1.2 | 1.1 | — |
+| 維生素 B2 核黃素 | mg | 1.3 | 1.0 | 1.3 | 1.1 | — |
+| 維生素 B6 | mg | 1.6 | 1.5 | 1.3 | 1.3 | 台灣建議量較高 |
+| 維生素 B12 | μg | 2.4 | 2.4 | 2.4 | 2.4 | 台美相同 |
+| 葉酸 Folate | μg DFE | 400 | 400 | 400 | 400 | 台美相同 |
+| 菸鹼素 Niacin | mg NE | 16 | 14 | 16 | 14 | 台美相同 |
+
+（依該成員性別對照對應欄位。）
+
+### 回應原則
+- 成員有在補**魚油**（omega-3）、**維生素 D**、**鈣**：最常見的不足項目，補充合理。
+- **葉黃素**（lutein）、**兒茶素**等抗氧化類：非 DRI 必需品，無建議量，無需特別評論。
+- 成員詢問「夠不夠」：說明微量營養素無法從飲食日誌完整追蹤，只能就 DRI 建議值給方向性判斷；鼓勵多樣化飲食為優先，保健食品為補充。
+- **不建議**成員自行提高劑量或停用處方藥物。
+
+### supplement_log 記錄與合併判讀
+- `supplement_log_<slug>.csv`：欄位 `date,supplement,dose_mg,notes`。成員回報當天服用保健食品時 append（不問、直接記；用 `echo >>` 或 helper，**不要** Read+Write/Edit）。
+- 成員詢問某微量營養素「夠不夠」時：
+  1. 從 `diet_log_<slug>.csv` 加總當日 `calcium_mg`/`iron_mg`（空值當 0）
+  2. 從 `supplement_log_<slug>.csv` 加總當日對應補充劑
+  3. 兩者相加對照 DRI（依該成員性別），給合併判讀
+- 無標示食物的鈣鐵**不估算、不填**，空值就是空值。
 
 ## food_reference.csv 維護
 
