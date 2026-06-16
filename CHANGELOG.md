@@ -1,5 +1,23 @@
 # Changelog
 
+## [v0.12.0] — 2026-06-16
+
+### ✨ 新功能：全家便利商店食安 API 查詢工具
+
+- **新增 `scripts/familymart-lookup.py`**：查詢[全家食在購安心](https://foodsafety.family.com.tw/Web_FFD_2022/)官方 API，取得商品完整標示值（P/C/F + 熱量 + 份量），自動 append 至 `food_reference.csv`。
+  - 兩段式查詢：`QueryFsProductListByFilter`（關鍵字 → CMNO 清單）→ `QueryFsProductByItem`（CMNO → 完整 `NUTRIENTS`）
+  - 支援關鍵字搜尋、CMNO 直查、`--list-only` 只列不寫、互動式多選
+  - 寫入透過 `food-ref-append.py`（flock + dedupe 保護），race-safe
+- **用法**：
+  ```sh
+  # 關鍵字搜尋（互動選擇要寫入哪幾項）
+  python3 scripts/familymart-lookup.py "雞胸"
+  # 直接用 CMNO 查並寫入
+  python3 scripts/familymart-lookup.py --cmno 0357416
+  # 只看結果不寫入
+  python3 scripts/familymart-lookup.py "飯糰" --list-only
+  ```
+
 ## [v0.11.1] — 2026-06-16
 
 ### 📊 新增：能量收支校正（recomp 合理性檢查）
