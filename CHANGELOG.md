@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.11.0] — 2026-06-16
+
+### ✨ 新功能：營養目標改「即時推導」+ recomp goal
+
+- **新增 `scripts/diet-targets.py`**：營養目標不再寫死在 SKILL.md，改由「最新 TDEE（`weight_log` 最後一筆）＋ goal」即時推導訓練日/休息日二段式目標——量體重重算 TDEE 後目標自動更新，免手改。單人用 `--goal`、群組用 `--slug`（goal 讀 `members.json`）。
+- **新增 `recomp` goal**（body recomposition）：訓練日 TDEE×1.10／休息日 ×0.90，熱量循環、週均 ≈ 維持體重——增肌減脂。完整 goal 選項：`cut` / `maintain` / `recomp` / `bulk`。
+- **`group/members.example.json`** 加 `goal` 範例欄位。
+- SKILL.md（單人）與 `group/CLAUDE.md`（群組）重算流程改為「量體重 → helper 寫入 → `diet-targets.py` 推導」，移除「手動算目標 ＋ 更新 SKILL.md 表格 ＋ 標版本日期」步驟。
+
 ## [v0.10.1] — 2026-06-15
 
 ### 文件 / 群組可用性

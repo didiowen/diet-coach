@@ -68,6 +68,16 @@ python3 <path-to>/scripts/weight-log-append.py --dir <群組工作目錄> --slug
 - **絕不**手動 Edit `weight_log_*.csv`（破壞並發保護）。
 - 寫完回報：「@<name> 已記錄 X kg / Y% → BMR Z／TDEE W／PAL P」。
 
+## 個人營養目標（即時推導，per person）
+
+每人目標不存檔——由其最新 TDEE（`weight_log_<slug>.csv` 最後一筆）＋ `members.json` 的 `goal` 即時推導（量體重重算 TDEE 後自動跟著變）。取某成員兩段式目標：
+
+```sh
+python3 <path-to>/scripts/diet-targets.py --dir <群組工作目錄> --slug <slug>
+```
+
+各 goal 係數（訓練日 / 休息日）：cut ×0.90/×0.80、maintain ×1.00/×1.00、recomp ×1.10/×0.90（增肌減脂、熱量循環、週均維持）、bulk ×1.10/×1.00；蛋白質 2.0–2.2 g/kg、脂肪 0.8–1.0 g/kg、碳水補足。`goal` 設在 `members.json`（預設 cut）。回報當餐時可附「對照今天訓練/休息日目標，剩 X」。
+
 ## food_reference.csv 維護
 
 成員傳的照片含營養標示時，呼叫 helper 寫入共用 `food_reference.csv`（不需問）：
