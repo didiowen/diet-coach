@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Derive two-tier (training-day / rest-day) nutrition targets for a member.
+"""Derive nutrition targets (2-tier train/rest, or 3-tier high/mid/rest) for a member.
 
 Targets are DERIVED, never stored: reads the member's latest TDEE + weight from
 weight_log_<slug>.csv (group) or weight_log.csv (single-user) and a goal
@@ -13,8 +13,13 @@ Goal factors applied to TDEE (training-day / rest-day):
                            training-day surplus + rest-day deficit for body recomp)
   bulk:     1.10 / 1.00
 
+3-tier mode (--tiers 3, or members.json "tiers": 3) inserts a mid-intensity day at
+the midpoint factor (high+rest)/2 — e.g. recomp -> 1.10 / 1.00 / 0.90. Because protein
+and fat are pinned to bodyweight, only the kcal factor moves and carbs absorb the swing.
+Default stays 2-tier so existing single-/multi-user setups are unaffected.
+
 Macros: protein 2.0-2.2 g/kg; fat 0.8-1.0 g/kg; carb fills the remainder.
-Goal comes from members.json (the member's "goal") unless --goal overrides; default cut.
+Goal/tiers come from members.json unless --goal/--tiers override; defaults cut / 2.
 
 Example:
     diet-targets.py --dir ~/diet-group --slug yr
@@ -49,23 +54,29 @@ def main():
     ap.add_argument("--dir", default=str(Path.cwd()))
     ap.add_argument("--slug", default=None, help="group member slug (omit for single-user)")
     ap.add_argument("--goal", choices=list(GOAL_FACTORS), default=None, help="override members.json")
+    ap.add_argument("--tiers", type=int, choices=[2, 3], default=None,
+                    help="2-tier (train/rest) or 3-tier (high/mid/rest); default from members.json or 2")
     args = ap.parse_args()
 
     base = Path(args.dir).expanduser()
     suffix = f"_{args.slug}" if args.slug else ""
 
-    goal = args.goal
-    if goal is None and args.slug:
+    goal, tiers = args.goal, args.tiers
+    if (goal is None or tiers is None) and args.slug:
         mfile = base / "members.json"
         if mfile.exists():
             try:
                 for v in json.load(open(mfile)).values():
                     if isinstance(v, dict) and v.get("slug") == args.slug:
-                        goal = v.get("goal")
+                        if goal is None:
+                            goal = v.get("goal")
+                        if tiers is None:
+                            tiers = v.get("tiers")
                         break
             except (ValueError, OSError):
                 pass
     goal = goal or "cut"
+    tiers = tiers if tiers in (2, 3) else 2
 
     weight, tdee = latest_weight_tdee(base / f"weight_log{suffix}.csv")
     if weight is None or tdee is None:
@@ -76,16 +87,19 @@ def main():
     f_lo, f_hi = round(weight * 0.8), round(weight * 1.0)
     p_mid, f_mid = (p_lo + p_hi) / 2, (f_lo + f_hi) / 2
 
-    def tier(factor):
+    def line(label, factor):
         kcal = round(tdee * factor)
         carb = max(0, round((kcal - p_mid * 4 - f_mid * 9) / 4))
-        return kcal, carb
+        return f"{label}：熱量 {kcal}｜P {p_lo}-{p_hi} g｜C ~{carb} g｜F {f_lo}-{f_hi} g"
 
-    tr_kcal, tr_carb = tier(tf)
-    re_kcal, re_carb = tier(rf)
-    print(f"goal={goal} | TDEE={round(tdee)} | weight={weight}kg")
-    print(f"訓練日：熱量 {tr_kcal}｜P {p_lo}-{p_hi} g｜C ~{tr_carb} g｜F {f_lo}-{f_hi} g")
-    print(f"休息日：熱量 {re_kcal}｜P {p_lo}-{p_hi} g｜C ~{re_carb} g｜F {f_lo}-{f_hi} g")
+    print(f"goal={goal} | TDEE={round(tdee)} | weight={weight}kg | tiers={tiers}")
+    if tiers == 3:
+        print(line("高強度日", tf))
+        print(line("中強度日", (tf + rf) / 2))
+        print(line("休息日", rf))
+    else:
+        print(line("訓練日", tf))
+        print(line("休息日", rf))
 
 
 if __name__ == "__main__":
