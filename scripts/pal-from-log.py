@@ -85,7 +85,7 @@ def main():
             if not (window_start <= d <= today):
                 continue
             all_dates.add(d)
-            if row.get("training_day", "").strip().upper() == "TRUE":
+            if row.get("training_day", "").strip().upper() in ("TRUE", "MID"):
                 training_dates.add(d)
 
     print(f"window: {window_start.isoformat()} -- {today.isoformat()} ({args.days} days)")

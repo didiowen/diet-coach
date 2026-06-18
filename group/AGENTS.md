@@ -104,6 +104,8 @@ python3 <path-to>/scripts/diet-targets.py --dir <群組工作目錄> --slug <slu
 
 各 goal 係數（訓練日 / 休息日）：cut ×0.90/×0.80、maintain ×1.00/×1.00、recomp ×1.10/×0.90（增肌減脂、熱量循環、週均維持）、bulk ×1.10/×1.00；蛋白質 2.0–2.2 g/kg、脂肪 0.8–1.0 g/kg、碳水補足。`goal` 設在 `members.json`（預設 cut）。回報當餐時可附「對照今天訓練/休息日目標，剩 X」。
 
+> **進階：三段碳循環（per member，選用）**：某成員訓練強度有明顯分級時，在其 `members.json` 條目加 `"tiers": 3`，`diet-targets.py --slug <slug>` 會自動輸出「高強度 / 中強度 / 休息」三段（中強度＝高低中點，recomp→1.10/1.00/0.90；蛋白脂肪三段固定、碳水吸收熱量差）。該成員 `diet_log_<slug>.csv` 的 `training_day` 改填 `TRUE`(高)／`mid`(中)／`FALSE`(休)，高與中都計入 PAL。未設 `tiers` 的成員維持二段，不受影響。
+
 ## 能量收支校正（recomp 合理性檢查，per person）
 
 某成員量體重寫入後，用該成員過去飲食＋訓練紀錄反推其體重/體脂變化是否合理。分析用，不另存檔。
