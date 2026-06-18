@@ -1,5 +1,16 @@
 # Changelog
 
+## [v0.15.0] — 2026-06-18
+
+### ♻️ 結構：AGENTS.md 為單一來源（spec），CLAUDE.md = `@AGENTS.md`
+
+- **canonical spec 從 `.claude/skills/diet-coach/SKILL.md` 移到根目錄 `AGENTS.md`**：Codex 原生讀取；同層新增 `CLAUDE.md`（一行 `@AGENTS.md`，Claude Code 展開 import）。兩種 provider 讀同一份來源、不再 drift。
+- **移除 shipped `.claude/skills/diet-coach/SKILL.md`**：要裝成 `/diet-coach` skill 改為「複製 `AGENTS.md` → `~/.claude/skills/diet-coach/SKILL.md`」（`AGENTS.md` 開頭保留 skill frontmatter，複製即合法）。
+- spec 內部自我引用改為檔名無關（「本檔」）；README 安裝步驟、檔案表、升級與 troubleshooting、badge 一併更新。
+- `group/` 同步採同模式（`AGENTS.md` 為 spec、`CLAUDE.md` = `@AGENTS.md`），並補上估算原則／辨識陷阱段落。
+
+> Migration：既有 skill 使用者重 pull template 後 `cp AGENTS.md ~/.claude/skills/diet-coach/SKILL.md`（先備份 backfill 過的個人資料）；工作目錄使用者把 `AGENTS.md` + `CLAUDE.md` 放進資料目錄即可。
+
 ## [v0.14.0] — 2026-06-16
 
 ### ✨ 新功能：食藥署鈣鐵回填 + food_reference 鈣鐵欄

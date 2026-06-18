@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/didiowen/diet-coach/actions/workflows/ci.yml/badge.svg)](https://github.com/didiowen/diet-coach/actions/workflows/ci.yml)
 [![Made in Taiwan](https://img.shields.io/badge/Made%20in-Taiwan%20%F0%9F%87%B9%F0%9F%87%BC-red)](https://github.com/htlin222/society-calendar)
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill%20Based-blueviolet?logo=anthropic)](https://claude.ai/claude-code)
+[![Claude Code](https://img.shields.io/badge/Claude%20%2B%20Codex-AGENTS.md-blueviolet?logo=anthropic)](https://claude.ai/claude-code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 一個用 Telegram 跟 Claude 對話的飲食日記。傳張食物照片或文字描述，bot 幫你估熱量與蛋白質／碳水／脂肪，寫進本地 CSV——記飲食三天就放棄的人專用。
@@ -20,7 +20,7 @@
 ## 運作方式
 
 1. Telegram DM 傳食物照片或文字描述
-2. Claude / Codex 讀取 spec（`SKILL.md` 或 `CLAUDE.md`），估算營養素並主動問清楚（油量、份量、醬料）
+2. Claude / Codex 讀取 spec（canonical 是 `AGENTS.md`；Claude 經同層 `CLAUDE.md` 的 `@AGENTS.md` import），估算營養素並主動問清楚（油量、份量、醬料）
 3. CSV append + 對照當日目標
 
 儲存方式擇一：
@@ -36,7 +36,8 @@
 
 | 檔案 | 用途 |
 |------|------|
-| `.claude/skills/diet-coach/SKILL.md` | canonical spec——行為規則、目標、估算原則。可裝成 skill（`/diet-coach`）或工作目錄 `CLAUDE.md`，見[安裝步驟](#安裝步驟) |
+| `AGENTS.md` | **canonical spec**——行為規則、目標、估算原則（Codex 原生讀）。開頭含 skill frontmatter，複製成 `SKILL.md` 即可裝成 skill（`/diet-coach`），見[安裝步驟](#安裝步驟) |
+| `CLAUDE.md` | 一行 `@AGENTS.md`——讓 Claude Code（工作目錄模式）展開 import、讀到同一份 spec |
 | `diet_log.csv` | 模板：逐餐營養記錄 |
 | `food_reference.csv` | 模板：食品資料庫（可從照片自動累積；公版內建台灣食藥署 2,160 筆） |
 | `weight_log.csv` | 模板：體重/代謝快照（8 欄：`date,height_cm,weight_kg,body_fat_pct,bmr,tdee,pal,notes`） |
@@ -74,24 +75,24 @@ cp ~/diet-coach-template/weight_log.csv ~/diet-coach/
 cp ~/diet-coach-template/food_reference.csv ~/diet-coach/
 cp -r ~/diet-coach-template/scripts ~/diet-coach/
 
-# 4. 安裝 spec 檔 —— 兩種模式擇一（同一份檔，內容一樣，只差怎麼被載入）
+# 4. 安裝 spec —— canonical 是 AGENTS.md；同層的 CLAUDE.md 只是一行 @AGENTS.md
+#    （Codex 原生讀 AGENTS.md；Claude Code 讀 CLAUDE.md 並展開 import——兩邊同一份來源）
 
-#   模式 A｜Skill：想用 /diet-coach、官方 MCP plugin 使用者
+#   模式 B｜工作目錄（ctb 等 Agent SDK，開機自動載入、推薦）：把 spec 放進 bot 工作目錄
+cp ~/diet-coach-template/AGENTS.md ~/diet-coach/AGENTS.md
+cp ~/diet-coach-template/CLAUDE.md ~/diet-coach/CLAUDE.md   # 一行 @AGENTS.md
+
+#   模式 A｜Skill（想用 /diet-coach）：把同一份 spec 複製成 SKILL.md
+#   （AGENTS.md 開頭已含 skill 需要的 YAML frontmatter，複製即為合法 skill）
 mkdir -p ~/.claude/skills/diet-coach
-cp ~/diet-coach-template/.claude/skills/diet-coach/SKILL.md ~/.claude/skills/diet-coach/SKILL.md
-#   （想自動跟 template 同步，可改用 symlink：
-#    ln -sfn ~/diet-coach-template/.claude/skills/diet-coach ~/.claude/skills/diet-coach）
-
-#   模式 B｜工作目錄：ctb 等 Agent SDK，開機自動載入、免打 /diet-coach
-#   把同一份 spec 放成 bot 工作目錄下的 CLAUDE.md（前置 YAML frontmatter 在此無害）
-cp ~/diet-coach-template/.claude/skills/diet-coach/SKILL.md ~/diet-coach/CLAUDE.md
+cp ~/diet-coach-template/AGENTS.md ~/.claude/skills/diet-coach/SKILL.md
 ```
 
 5. 設定 Telegram（見下方教學）
-6. 第一次 DM bot：Claude 會逐項詢問身高、體重、體脂、目標等，回完自動 backfill 到你的 spec 檔（SKILL.md 或 CLAUDE.md）。**不需要手動編輯**。
+6. 第一次 DM bot：Claude 會逐項詢問身高、體重、體脂、目標等，回完自動 backfill 到你的 spec 檔（`AGENTS.md`；skill 模式則為 `SKILL.md`）。**不需要手動編輯**。
 7. 之後傳食物照片或描述，Claude 直接估算記錄
 
-> spec 檔（SKILL.md / CLAUDE.md）內預設的資料目錄是 `~/diet-coach/`。若你用其他位置（例：`~/Dropbox/diet-coach/`），請全文搜尋取代為你的實際路徑。
+> spec 檔（`AGENTS.md`）內預設的資料目錄是 `~/diet-coach/`。若你用其他位置（例：`~/Dropbox/diet-coach/`），請全文搜尋取代為你的實際路徑。
 
 ## Telegram 設置
 
@@ -199,7 +200,7 @@ ctb 進階用法（多人 allowlist 各自 routing、`/cd` 切換工作目錄、
 
 ## 個人化設定
 
-在 `SKILL.md` 中調整以下區塊：
+在 spec（`AGENTS.md`）中調整以下區塊：
 
 - **初始設定**：首次使用時 Claude 或 Codex 會詢問基本資料，自動計算 BMR/TDEE 並設定目標
 - **NG食物管理**：定義哪些食物算 NG、每週限制次數、超標時的回應風格
@@ -229,7 +230,7 @@ Bot: 算好了——
      - 訓練日：熱量 1700｜P 115-125｜C 200-220｜F 55-60
      - 休息日：熱量 1500｜P 115-125｜C 130-150｜F 55-60
      - NG 上限：3 次/週
-     回覆「確認」即寫入 SKILL.md。
+     回覆「確認」即寫入 spec。
 
 You: 確認
 
@@ -284,10 +285,11 @@ cd ~/diet-coach-template && git pull origin main
 # 2. 看 CHANGELOG 找 Migration 區段
 less CHANGELOG.md
 
-# 3. 同步 SKILL.md（先備份 backfill 過的個人資料）
-cp ~/.claude/skills/diet-coach/SKILL.md /tmp/SKILL.md.backup
-cp ~/diet-coach-template/.claude/skills/diet-coach/SKILL.md ~/.claude/skills/diet-coach/SKILL.md
-# 手動把備份裡的「使用者背景」與「NG 食物閾值」貼回新 SKILL.md
+# 3. 同步 spec（先備份 backfill 過的個人資料）
+cp ~/diet-coach/AGENTS.md /tmp/AGENTS.md.backup
+cp ~/diet-coach-template/AGENTS.md ~/diet-coach/AGENTS.md
+# 手動把備份裡的「使用者背景」與「NG 食物閾值」貼回新 AGENTS.md
+# （skill 模式：再 cp ~/diet-coach-template/AGENTS.md ~/.claude/skills/diet-coach/SKILL.md）
 
 # 4. 同步 helpers（無個人資料，直接覆蓋）
 cp -r ~/diet-coach-template/scripts ~/diet-coach/
@@ -332,9 +334,10 @@ v1.x 可以新增可選欄位（append-only），但**不會**：
 
 ## Troubleshooting
 
-### Claude session 沒讀到 skill
-- 確認 `~/.claude/skills/diet-coach/SKILL.md` 存在（**不是** `~/.claude/skills/SKILL.md` 或 `~/diet-coach/SKILL.md`）
-- 重啟 Claude Code session（skill 是 session 啟動時載入）
+### Claude / Codex 沒讀到 spec
+- 工作目錄模式：確認 bot 工作目錄（`~/diet-coach/`）有 `AGENTS.md`（Codex 讀）與 `CLAUDE.md`（= `@AGENTS.md`，Claude 讀）
+- skill 模式：確認 `~/.claude/skills/diet-coach/SKILL.md` 存在（從 template 的 `AGENTS.md` 複製而來）
+- 重啟 Claude Code session（spec 是 session 啟動時載入）
 - ctb 啟動時印的工作目錄是否為 `~/diet-coach`？若否，`cd ~/diet-coach && ctb`
 
 ### `python3: command not found`
