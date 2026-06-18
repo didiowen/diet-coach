@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.16.0] — 2026-06-18
+
+### ✨ 新功能：三段碳循環（選用，預設仍二段）
+
+- **`diet-targets.py` 新增 `--tiers`（2/3，預設 2、可由 `members.json` 的 `tiers` 設定）**：訓練強度有明顯分級者可開三段「高強度 / 中強度 / 休息」。中強度係數取高/低中點（recomp → 1.10 / 1.00 / 0.90）。蛋白質與脂肪三段固定釘體重，碳水獨自吸收熱量差＝碳水階梯。
+- **`training_day` 欄位支援三值**：`TRUE`(高強度)／`mid`(中強度)／`FALSE`(休息)。`pal-from-log.py`、`weight-log-append.py` 把 `TRUE` 與 `mid` 都計入訓練頻率（中強度日也進 PAL）；`diet-summary.py` 新增 `mid-intensity day` 標籤。
+- `AGENTS.md`（單人）與 `group/AGENTS.md`（多人）補「進階：三段碳循環」說明。
+
+> 向後相容：預設仍二段；未設 `tiers` 的使用者／成員永不產生 `mid`、行為不變；舊 `TRUE`/`FALSE` 資料照常解析。
+
 ## [v0.15.0] — 2026-06-18
 
 ### ♻️ 結構：AGENTS.md 為單一來源（spec），CLAUDE.md = `@AGENTS.md`

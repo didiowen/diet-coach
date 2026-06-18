@@ -130,6 +130,16 @@ description: Estimates calories and macros for food (Taiwanese cuisine, restaura
 
 蛋白質 2.0–2.2 g/kg、脂肪 0.8–1.0 g/kg、碳水補足熱量餘額。群組版用 `--slug <slug>`，goal 讀 `members.json`。
 
+#### 進階：三段碳循環（選用，預設二段）
+
+訓練強度有明顯分級的人（例：教練課/重訓日 vs 在家輕量日 vs 全休），可加 `--tiers 3`（或 `members.json` 設 `"tiers": 3`）切出「高強度 / 中強度 / 休息」三段。中強度係數取高/低中點（recomp → 1.10 / 1.00 / 0.90）。因為蛋白質與脂肪都釘在體重上三段固定，只有 kcal 係數變、**碳水獨自吸收熱量差**，所以三段＝碳水階梯（高→中→低），脂肪不動。
+
+```sh
+~/diet-coach/scripts/diet-targets.py --dir ~/diet-coach --goal recomp --tiers 3
+```
+
+開三段時把 `diet_log.csv` 的 `training_day` 欄填三值：`TRUE`=高強度日／`mid`=中強度日／`FALSE`=休息日（高與中都計入 PAL 訓練頻率，休息不計）。**預設仍二段**，沒分級需求不必設。
+
 ### 不可妥協的下限（任何目標都適用）
 
 - 蛋白質：體重 × 1.6 g 以上

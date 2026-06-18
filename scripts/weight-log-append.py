@@ -66,7 +66,7 @@ def pal_from_log(diet_log, today, days=14):
                 d = date_cls.fromisoformat(row["date"])
             except (ValueError, KeyError):
                 continue
-            if window_start <= d <= today and row.get("training_day", "").strip().upper() == "TRUE":
+            if window_start <= d <= today and row.get("training_day", "").strip().upper() in ("TRUE", "MID"):
                 training.add(d)
     return bucket_pal(len(training) * 7 / days)
 
