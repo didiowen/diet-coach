@@ -58,13 +58,13 @@ def main():
                 except (ValueError, KeyError):
                     pass
             if training_day is None:
-                training_day = row.get("training_day", "").upper() == "TRUE"
+                training_day = row.get("training_day", "").strip().upper() or None
 
     if not rows:
         print(f"{args.date}: 當日無記錄 (no entries in {args.csv})")
         return
 
-    label = "training day" if training_day else "rest day" if training_day is False else "unmarked"
+    label = {"TRUE": "training day", "MID": "mid-intensity day", "FALSE": "rest day"}.get(training_day, "unmarked")
     print(f"{args.date} ({label})")
     print(f"entries: {len(rows)}")
     print(f"kcal: {totals['calories']:.0f} | P {totals['protein_g']:.0f} g | "
