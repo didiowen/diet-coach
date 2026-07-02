@@ -52,13 +52,25 @@
 
 **diet_log.csv**
 ```
-date, meal_type, food, calories, protein_g, carb_g, fat_g, training_day, notes
+date, meal_type, food, calories, protein_g, carb_g, fat_g, training_day, notes, calcium_mg, iron_mg
 ```
 
 **food_reference.csv**
 ```
-food_name, source, serving_size_g, calories, protein_g, carb_g, fat_g, notes
+food_name, source, serving_size_g, calories, protein_g, carb_g, fat_g, notes, calcium_mg, iron_mg
 ```
+
+（`calcium_mg`／`iron_mg` 選填，僅在來源有營養標示時填，不估算。）
+
+## 前置需求
+
+| 需求 | 用途 | 必要性 |
+|------|------|--------|
+| [Claude Code](https://claude.ai/claude-code) 或 [Codex CLI](https://github.com/openai/codex) | 讀 spec、估算營養素的 agent | 必要（擇一） |
+| Python ≥ 3.11 | helper scripts（`scripts/*.py`，皆為標準函式庫、無需 pip install） | 必要 |
+| Telegram Bot（[@BotFather](https://t.me/botfather) 建立） | 用 Telegram 記錄 | 選用（也可直接在終端機用） |
+| [Bun](https://bun.sh) | Telegram 選項 A（官方 MCP plugin） | 選用 |
+| Node.js ≥ 20 | Telegram 選項 B（[ctb](https://github.com/htlin222/claude-telegram-bot)） | 選用 |
 
 ## 安裝步驟
 
