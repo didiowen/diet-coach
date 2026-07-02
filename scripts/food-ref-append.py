@@ -108,6 +108,11 @@ def main() -> int:
         fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
         try:
             fh.seek(0)
+            # Skip a UTF-8 BOM (Excel-saved CSVs) so the first header isn't
+            # misread. Can't open with utf-8-sig: its encoder would inject
+            # a BOM mid-file on the append write below.
+            if fh.read(1) != "\ufeff":
+                fh.seek(0)
             reader = csv.DictReader(fh)
             for existing in reader:
                 if (existing.get("food_name") == row["food_name"]
