@@ -55,7 +55,7 @@ def bucket_pal(per_week):
 def pal_from_log(diet_log, today, days=14):
     """Bucketed PAL from unique training days in the past `days`. Defaults light if no log."""
     try:
-        fh = open(diet_log, newline="")
+        fh = open(diet_log, newline="", encoding="utf-8-sig")
     except FileNotFoundError:
         return 1.375
     window_start = today - timedelta(days=days - 1)
@@ -136,7 +136,7 @@ def main():
         "notes": args.notes,
     }
 
-    with open(out, "a", newline="") as fh:
+    with open(out, "a", newline="", encoding="utf-8") as fh:
         fcntl.flock(fh, fcntl.LOCK_EX)
         fh.seek(0, 2)
         if fh.tell() == 0:

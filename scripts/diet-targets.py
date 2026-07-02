@@ -19,6 +19,8 @@ and fat are pinned to bodyweight, only the kcal factor moves and carbs absorb th
 Default stays 2-tier so existing single-/multi-user setups are unaffected.
 
 Macros: protein 2.0-2.2 g/kg; fat 0.8-1.0 g/kg; carb fills the remainder.
+Hard floor: a day's kcal is never set below BMR (read from the weight log row;
+skipped when bmr is absent/blank).
 Goal/tiers come from members.json unless --goal/--tiers override; defaults cut / 2.
 
 Example:
@@ -35,18 +37,27 @@ GOAL_FACTORS = {"cut": (0.90, 0.80), "maintain": (1.00, 1.00), "recomp": (1.10, 
 
 
 def latest_weight_tdee(path):
+    """Return (weight_kg, tdee, bmr) from the last usable weight_log row.
+
+    Scans backward so one malformed trailing row doesn't discard an otherwise
+    valid log. bmr is None when the column is absent/blank (floor check skipped).
+    """
     try:
-        with open(path, newline="") as f:
+        with open(path, newline="", encoding="utf-8-sig") as f:
             rows = list(csv.DictReader(f))
     except FileNotFoundError:
-        return None, None
-    if not rows:
-        return None, None
-    last = rows[-1]
-    try:
-        return float(last["weight_kg"]), float(last["tdee"])
-    except (KeyError, ValueError):
-        return None, None
+        return None, None, None
+    for row in reversed(rows):
+        try:
+            weight, tdee = float(row["weight_kg"]), float(row["tdee"])
+        except (KeyError, ValueError, TypeError):
+            continue
+        try:
+            bmr = float(row["bmr"])
+        except (KeyError, ValueError, TypeError):
+            bmr = None
+        return weight, tdee, bmr
+    return None, None, None
 
 
 def main():
@@ -76,9 +87,11 @@ def main():
             except (ValueError, OSError):
                 pass
     goal = goal or "cut"
+    if goal not in GOAL_FACTORS:
+        sys.exit(f"error: unknown goal '{goal}' (members.json?) — expected one of: {', '.join(GOAL_FACTORS)}")
     tiers = tiers if tiers in (2, 3) else 2
 
-    weight, tdee = latest_weight_tdee(base / f"weight_log{suffix}.csv")
+    weight, tdee, bmr = latest_weight_tdee(base / f"weight_log{suffix}.csv")
     if weight is None or tdee is None:
         sys.exit("error: no usable weight_log row (need weight_kg + tdee) — log a weigh-in first.")
 
@@ -89,8 +102,12 @@ def main():
 
     def line(label, factor):
         kcal = round(tdee * factor)
+        floored = bmr is not None and kcal < round(bmr)
+        if floored:
+            kcal = round(bmr)  # hard floor: never prescribe below BMR
         carb = max(0, round((kcal - p_mid * 4 - f_mid * 9) / 4))
-        return f"{label}：熱量 {kcal}｜P {p_lo}-{p_hi} g｜C ~{carb} g｜F {f_lo}-{f_hi} g"
+        note = "（已提升至 BMR 下限）" if floored else ""
+        return f"{label}：熱量 {kcal}{note}｜P {p_lo}-{p_hi} g｜C ~{carb} g｜F {f_lo}-{f_hi} g"
 
     print(f"goal={goal} | TDEE={round(tdee)} | weight={weight}kg | tiers={tiers}")
     if tiers == 3:

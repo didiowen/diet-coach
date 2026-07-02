@@ -87,7 +87,7 @@ def main() -> int:
     minerals = load_fda_minerals()
     print(f"FDA DB: {len(minerals)} foods with calcium/iron", file=sys.stderr)
 
-    with open(args.csv, newline="", encoding="utf-8") as fh:
+    with open(args.csv, newline="", encoding="utf-8-sig") as fh:
         reader = csv.DictReader(fh)
         rows = list(reader)
         in_cols = reader.fieldnames or []
@@ -102,7 +102,7 @@ def main() -> int:
         if r.get("source") != TFDA_SOURCE:
             skipped_nontfda += 1
             continue
-        if r.get("calcium_mg") or r.get("iron_mg"):
+        if r.get("calcium_mg") and r.get("iron_mg"):
             already += 1
             continue
         name = r["food_name"]
