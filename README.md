@@ -45,7 +45,10 @@
 | `scripts/diet-summary.py` | 當日累計 kcal/P/C/F 從 `diet_log.csv` 加總 |
 | `scripts/pal-from-log.py` | 從 `diet_log.csv` 過去 N 天訓練頻率推薦 PAL |
 | `scripts/food-ref-append.py` | 並發安全 append `food_reference.csv`（`fcntl.flock` + dedupe） |
-| `scripts/weight-log-append.py` | 算 PAL+BMR/TDEE 並原子 append `weight_log.csv`（單人）或 `weight_log_<slug>.csv`（群組） |
+| `scripts/weight-log-append.py` | 算 PAL+BMR/TDEE 並原子 append `weight_log.csv`（單人）或 `weight_log_<slug>.csv`（群組）；`--pal` 可覆寫（首次記錄／log 太少時用） |
+| `scripts/diet-targets.py` | 從最新 `weight_log.csv` 依 goal（cut/maintain/recomp/bulk）推導訓練日/休息日熱量與 P/C/F 目標（spec 的目標一律由此推導，不手算） |
+| `scripts/backfill-food-ref-minerals.py` | 從台灣食藥署營養成分資料庫回填 `food_reference.csv` 的 `calcium_mg`/`iron_mg`（預設 dry-run，`--apply` 才寫入） |
+| `scripts/familymart-lookup.py` | 全家食安 API 查商品營養標示並寫入 `food_reference.csv` |
 | `group/` | 多人問責群組模板：`CLAUDE.md`、`members.example.json`、`AGENTS.md`、`WELCOME.md`（見[多人問責群組模式](#多人問責群組模式group-accountability)） |
 
 ## CSV 欄位
@@ -239,14 +242,16 @@ Bot: 算好了——
      - F/38/156｜54 kg｜體脂 30%
      - BMR 1186（Katch-McArdle）｜TDEE 1838（PAL 1.55）
      - 目標：減脂
-     - 訓練日：熱量 1700｜P 115-125｜C 200-220｜F 55-60
-     - 休息日：熱量 1500｜P 115-125｜C 130-150｜F 55-60
      - NG 上限：3 次/週
-     回覆「確認」即寫入 spec。
+     回覆「確認」即寫入 spec 並建立第一筆體重紀錄。
 
 You: 確認
 
-Bot: 已建立。往後傳食物照片或描述直接記錄。
+Bot: 已建立（weight_log 第一筆已寫入，PAL 1.55）。
+     當前目標（diet-targets.py，goal=cut）：
+     - 訓練日：熱量 1654｜P 108-119 g｜C ~191 g｜F 43-54 g
+     - 休息日：熱量 1470｜P 108-119 g｜C ~145 g｜F 43-54 g
+     往後傳食物照片或描述直接記錄。
 ```
 
 ### 開始記錄
@@ -262,7 +267,7 @@ Bot: 估算結果（誤差 ±15-20%）
      - 合計：~450 kcal｜P 44g｜C 39g｜F 14.5g
 
      已 append 到 diet_log.csv。
-     當日累計：450 / 1700 kcal（訓練日目標）— 26%
+     當日累計：450 / 1654 kcal（訓練日目標）— 27%
 ```
 
 之後每餐傳照片或文字描述，bot 自動估算 + append。每兩週若沒回報體重，會在回覆末尾提醒。
@@ -276,7 +281,7 @@ Bot: 估算結果（誤差 ±15-20%）
 **需求**：用 [diet-coach-bot](https://github.com/didiowen/diet-coach-bot)（≥ `v1.6.6-diet.2`）跑——它會把群組訊息自動標上發話者（`[group message from <name> (telegram_id:<id>)]`），多人版 spec 才能把每則食物歸到正確的人；身分以驗證過的數字 `telegram_id` 為準、有防偽（避免成員互相栽贓）。
 
 **設定**：
-1. 建一個群組工作目錄（例 `~/diet-group/`），把 `group/CLAUDE.md` 放成它的 `CLAUDE.md`。（可選）把 `group/WELCOME.md` 放成工作目錄的 `WELCOME.md`——新成員第一次傳訊息時 bot 會 verbatim 貼出來當 onboarding／公開揭露（記得改最後一行的管理員聯絡方式）。
+1. 建一個群組工作目錄（例 `~/diet-group/`），把 `group/AGENTS.md` 與 `group/CLAUDE.md` 都複製過去（`CLAUDE.md` 只是一行 `@AGENTS.md`——**兩個都要**，少了 `AGENTS.md` bot 會讀不到群組 spec）。（可選）把 `group/WELCOME.md` 放成工作目錄的 `WELCOME.md`——新成員第一次傳訊息時 bot 會 verbatim 貼出來當 onboarding／公開揭露（記得改最後一行的管理員聯絡方式）。
 2. `cp group/members.example.json ~/diet-group/members.json`，填入每位成員的 `telegram_id` → `slug` / `name` /（可選）`height_cm`/`age`/`gender`。
 3. 每位成員建 `diet_log_<slug>.csv` 與 `weight_log_<slug>.csv`（header 同單人版 / 8 欄）；把 `scripts/` 複製或指過去。
 4. 在那個工作目錄跑 diet-coach-bot 的 `.env`：新 bot token、`TELEGRAM_ALLOWED_USERS` 含全體成員 user_id、`ALLOWED_PATHS` 含工作目錄，並設 **`CTB_GROUP_AUTO_RESPOND=1`**（讓 bot 對群裡「每則訊息」都回、免 @mention；配合多人版 spec「只回食物/體重、純閒聊保持安靜」。接受 `1`/`true`/`yes`）。
@@ -321,18 +326,20 @@ cp -r ~/diet-coach-template/scripts ~/diet-coach/
 
 **diet_log.csv**
 ```
-date, meal_type, food, calories, protein_g, carb_g, fat_g, training_day, notes
+date, meal_type, food, calories, protein_g, carb_g, fat_g, training_day, notes, calcium_mg, iron_mg
 ```
 
 **food_reference.csv**
 ```
-food_name, source, serving_size_g, calories, protein_g, carb_g, fat_g, notes
+food_name, source, serving_size_g, calories, protein_g, carb_g, fat_g, notes, calcium_mg, iron_mg
 ```
 
 **weight_log.csv**
 ```
 date, height_cm, weight_kg, body_fat_pct, bmr, tdee, pal, notes
 ```
+
+（`calcium_mg`／`iron_mg` 於 v0.13 加入、v1.0 一併鎖定；值可留空。）
 
 v1.x 可以新增可選欄位（append-only），但**不會**：
 - 刪除既有欄位
@@ -371,8 +378,8 @@ chmod +x ~/diet-coach/scripts/*.py
 - BotFather 給的 token 拷貝完整（含開頭數字與冒號）
 
 ### `food-ref-append.py` 寫不進去
-- 設 `DIET_COACH_FOOD_REF` 環境變數指向你的 CSV：`export DIET_COACH_FOOD_REF=~/diet-coach/food_reference.csv`
-- 或建立 symlink：`ln -s ~/diet-coach/food_reference.csv ~/diet-coach/food_reference.csv`（預設路徑）
+- 預設路徑是 `~/diet-coach/food_reference.csv`；資料放在其他位置時，設 `DIET_COACH_FOOD_REF` 環境變數指向你的 CSV：`export DIET_COACH_FOOD_REF=~/Dropbox/diet-coach/food_reference.csv`
+- 或建立 symlink 讓預設路徑指到你的檔案：`ln -s ~/Dropbox/diet-coach/food_reference.csv ~/diet-coach/food_reference.csv`
 
 ## 注意事項
 

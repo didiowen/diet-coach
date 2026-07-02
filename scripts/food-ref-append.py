@@ -83,8 +83,9 @@ def main() -> int:
         description="Atomically append a row to food_reference.csv (flock + dedupe).",
     )
     for f in REQUIRED_FIELDS:
-        p.add_argument(f"--{f.replace('_', '-')}", required=True,
-                       help=f"value for {f} column")
+        # notes is a schema column but has no meaningful "required" value
+        p.add_argument(f"--{f.replace('_', '-')}", required=(f != "notes"),
+                       default="", help=f"value for {f} column")
     for f in OPTIONAL_FIELDS:
         p.add_argument(f"--{f.replace('_', '-')}", default="",
                        help=f"value for {f} column (optional micronutrient; blank if unknown)")

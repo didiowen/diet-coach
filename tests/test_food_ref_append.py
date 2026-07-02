@@ -25,6 +25,21 @@ def test_happy_append(tmp_path):
     assert "test豆漿" in csv.read_text()
 
 
+def test_notes_optional(tmp_path):
+    """--notes may be omitted; the column is written blank."""
+    csv = tmp_path / "food_reference.csv"
+    write_food_ref(csv, [])
+    r = run_script(
+        "food-ref-append.py",
+        "--food-name", "無備註餅乾", "--source", "測試",
+        "--serving-size-g", "30", "--calories", "150",
+        "--protein-g", "2", "--carb-g", "20", "--fat-g", "7",
+        env=_env_with_csv(csv),
+    )
+    assert r.returncode == 0, r.stderr
+    assert "無備註餅乾,測試,30,150,2,20,7,,," in csv.read_text()
+
+
 def test_duplicate_skip(tmp_path):
     csv = tmp_path / "food_reference.csv"
     write_food_ref(csv, [])

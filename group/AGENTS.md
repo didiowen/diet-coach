@@ -87,10 +87,11 @@ diet-coach-bot 會在每則群組訊息前自動標上發話者：
 
 ```sh
 python3 <path-to>/scripts/weight-log-append.py --dir <群組工作目錄> --slug <slug> \
-  --weight <kg> [--body-fat-pct <pct>] [--notes "..."]
+  --weight <kg> [--body-fat-pct <pct>] [--pal <pal>] [--notes "..."]
 ```
 
 - height/age/gender 從 `members.json` profile 讀；有體脂走 Katch 則年齡性別可省。
+- **首次回報（該成員 `diet_log_<slug>.csv` 還沒有或很少記錄）**：先問該成員「每週幾次重訓或有氧？」，對照 PAL 桶（<1 次 1.20／1–3 次 1.375／3–5 次 1.55／6–7 次 1.725）後帶 `--pal`——不帶會被空 log 自動推成 1.20、TDEE 低估。之後 log 累積了就省略 `--pal` 讓腳本自動推。
 - **絕不**手動 Edit `weight_log_*.csv`（破壞並發保護）。
 - 寫完回報：「@<name> 已記錄 X kg / Y% → BMR Z／TDEE W／PAL P」。
 

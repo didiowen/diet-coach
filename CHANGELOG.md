@@ -1,5 +1,24 @@
 # Changelog
 
+## [v1.1.0] — 2026-07-02
+
+### 🧪 全新安裝模擬修正（fresh-install simulation fixes）
+
+以「全新使用者從 clone 到第一天」實測找出的 8 個問題：
+
+- **執行權限**：`diet-targets.py`／`weight-log-append.py`／`backfill-food-ref-minerals.py`／`familymart-lookup.py` 補上 executable bit——spec 以直接執行語法呼叫（`~/diet-coach/scripts/diet-targets.py …`），過去會 `permission denied`，onboarding 後第一次體重回報就會撞到。
+- **`weight-log-append.py` 新增 `--pal` 覆寫**（backward compatible）：修正冷啟動矛盾——onboarding 問出「每週運動頻率」得 PAL 1.55，但腳本從空 diet_log 自動推成 1.20、TDEE 低估約 400 kcal。首次記錄或 log 太少（sparse 警告）時帶 `--pal`；資料足夠時省略照舊自動推。範圍驗證 1.0–2.5。
+- **onboarding 流程補完**（`AGENTS.md`）：使用者「確認」後除了回填 spec，還會 seed 第一筆 weigh-in（帶 `--pal <onboarding_pal>`）並跑 `diet-targets.py` 回報目標——修正「初始設定完 `diet-targets.py` 必報 no usable weight_log row」的矛盾。`group/AGENTS.md` 同步補成員首次回報的 `--pal` 指引。
+- **`food-ref-append.py` 的 `--notes` 改 optional**（預設空字串），與 `--calcium-mg`／`--iron-mg` 的選填設計一致。
+- **README 群組模式安裝修正**：步驟 1 補「同時複製 `group/AGENTS.md`」——過去只複製 `group/CLAUDE.md`（內容僅 `@AGENTS.md`），import 懸空、bot 讀不到群組 spec。
+- **README「CSV schema 鎖死宣告」更正**：diet_log／food_reference 改列實際 v1.0 的 11／10 欄 schema（原誤列 v0.12 的 9／8 欄，與同檔「CSV 欄位」段矛盾）。
+- **README troubleshooting 修正**：`food-ref-append.py` 的 symlink 範例原為自我指涉（來源＝目標），改為從自訂路徑連到預設路徑。
+- **README 檔案說明表補列** `diet-targets.py`、`backfill-food-ref-minerals.py`、`familymart-lookup.py`。
+- **walkthrough 更新**：onboarding 對話改為與 spec 一致的實際輸出（seed weigh-in → diet-targets 推導目標）。
+- **測試**：+3（`--pal` 覆寫／`--pal` 範圍驗證／`--notes` 省略），全套 44 tests；Python 3.14 實測通過。
+
+> Migration：無 schema 變更。升級照 README「升級」步驟覆蓋 `scripts/` 與 spec 即可；已 onboard 的使用者不受 onboarding 流程變更影響。
+
 ## [v1.0.0] — 2026-07-02
 
 ### 🎉 首個正式版
