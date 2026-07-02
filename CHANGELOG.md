@@ -1,5 +1,25 @@
 # Changelog
 
+## [v1.0.0] — 2026-07-02
+
+### 🎉 首個正式版
+
+發布前完整稽核（漂移／bug／缺口）後的收斂版本。
+
+- **修正 `diet-targets.py`**：
+  - `members.json` 的 `goal` 打錯字不再噴 `KeyError` traceback，改為友善錯誤訊息。
+  - 實作規格的硬下限「熱量不低於 BMR」——久坐（PAL 1.20）＋ cut 休息日過去會算出 BMR×0.96；現在自動提升至 BMR 並標註（已提升至 BMR 下限）。
+  - `weight_log` 最後一列壞掉時往回掃最後一筆可用列，不再整個 abort。
+- **CSV BOM 容錯**：讀取一律 `utf-8-sig`（diet-summary／pal-from-log／weight-log-append／backfill）；`food-ref-append.py` 因 r+ append 改手動略過 BOM。Excel 存過的 CSV 不再誤報 missing columns。
+- **`backfill-food-ref-minerals.py`**：「有鈣但缺鐵」的列不再被當作已填完而跳過。
+- **`diet_log.csv` 模板**：補上規格宣告必要的 `calcium_mg,iron_mg` 兩欄（v0.13 起 spec 有、模板漏了）。
+- **測試**：新增 `test_diet_targets.py`（三段係數／goal 驗證／BMR 下限／壞尾列回掃／BOM）與 `test_weight_log_append.py`（Katch-McArdle／Mifflin／members.json profile／TRUE+MID PAL）。全套 41 tests。
+- **社群檔案**：SECURITY.md、CODE_OF_CONDUCT.md、issue templates；README 新增「前置需求」表，CSV 欄位文件更新至 11／10 欄。
+- **資料**：food_reference.csv +427 條（7-ELEVEN／全家／Subway／摩斯／星巴克／麻古等）。
+- **歷史清理**：以 git filter-repo 從 git 歷史移除 init commit 夾帶的個人飲食紀錄；所有 commit hash 與 tags 已重寫，fork／舊 clone 請重新 clone。
+
+> 註：v0.15.0 當時只寫了 CHANGELOG、未建 tag／release，版本號跳過屬正常。
+
 ## [v0.16.0] — 2026-06-18
 
 ### ✨ 新功能：三段碳循環（選用，預設仍二段）
