@@ -69,6 +69,26 @@ def test_appends_header_once(tmp_path):
     assert len(read_rows(tmp_path / "weight_log.csv")) == 2
 
 
+def test_pal_override_beats_log_derivation(tmp_path):
+    """--pal overrides the diet-log derivation (first weigh-in / sparse log)."""
+    r = run_script("weight-log-append.py", "--dir", str(tmp_path),
+                   "--weight", "54", "--body-fat-pct", "30",
+                   "--pal", "1.55", "--date", "2026-06-14")
+    assert r.returncode == 0, r.stderr
+    rows = read_rows(tmp_path / "weight_log.csv")
+    # LBM 54*0.70 = 37.8 -> BMR round(370 + 21.6*37.8) = 1186
+    assert rows[0]["pal"] == "1.55"
+    assert rows[0]["tdee"] == str(round(1186 * 1.55))
+
+
+def test_pal_out_of_range_errors(tmp_path):
+    r = run_script("weight-log-append.py", "--dir", str(tmp_path),
+                   "--weight", "54", "--body-fat-pct", "30",
+                   "--pal", "3.0", "--date", "2026-06-14")
+    assert r.returncode != 0
+    assert "out of range" in r.stderr
+
+
 def test_no_body_fat_and_no_profile_errors(tmp_path):
     r = run_script("weight-log-append.py", "--dir", str(tmp_path),
                    "--weight", "70", "--date", "2026-06-14")

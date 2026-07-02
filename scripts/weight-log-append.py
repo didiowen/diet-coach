@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Append a metabolic snapshot to a weight log (single-user or group).
 
-Computes PAL (from recent training frequency in the diet log) and BMR/TDEE
+Computes PAL (from recent training frequency in the diet log, or --pal
+override for first weigh-ins / sparse logs) and BMR/TDEE
 (Katch-McArdle if body-fat given, else Mifflin-St Jeor), then atomically
 (fcntl.flock) appends one row:
 
@@ -81,6 +82,11 @@ def main():
     ap.add_argument("--age", type=int, default=None)
     ap.add_argument("--gender", choices=["female", "male"], default=None)
     ap.add_argument("--date", default=date_cls.today().isoformat())
+    ap.add_argument(
+        "--pal", type=float, default=None,
+        help="override PAL (first weigh-in from onboarding answers, or keep current "
+             "PAL when the diet log is sparse); default: derived from diet log",
+    )
     ap.add_argument("--notes", default="")
     args = ap.parse_args()
 
@@ -107,6 +113,8 @@ def main():
 
     if not (20 <= args.weight <= 300):
         sys.exit(f"error: --weight {args.weight} out of range (20-300 kg)")
+    if args.pal is not None and not (1.0 <= args.pal <= 2.5):
+        sys.exit(f"error: --pal {args.pal} out of range (1.0-2.5)")
     if args.body_fat_pct is not None and not (3 <= args.body_fat_pct <= 60):
         sys.exit(f"error: --body-fat-pct {args.body_fat_pct} out of range (3-60)")
     if args.body_fat_pct is None and not (height and age and gender):
@@ -121,7 +129,7 @@ def main():
     except ValueError:
         sys.exit(f"error: --date {args.date!r} is not valid YYYY-MM-DD")
 
-    pal = pal_from_log(diet_log, today)
+    pal = args.pal if args.pal is not None else pal_from_log(diet_log, today)
     bmr = calc_bmr(args.weight, height or 0, age or 0, gender, args.body_fat_pct)
     tdee = round(bmr * pal)
 

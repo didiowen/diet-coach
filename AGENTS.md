@@ -54,7 +54,10 @@ description: Estimates calories and macros for food (Taiwanese cuisine, restaura
 6. **飲食偏好或過敏**：低脂高蛋白 / 素食 / 過敏食物 / 無
 7. **NG 食物週上限**：每週幾次甜點/手搖飲/挫冰算「超標」（建議 3）
 
-收完後依「BMR / TDEE 計算」段呼叫 `bmr-tdee.py` 算 BMR/TDEE，依目標套出訓練日/休息日二段式營養目標。
+收完後：
+
+1. 從 3) 訓練頻率＋4) 日常活動量對照「TDEE = BMR × 活動係數」的 PAL 表選桶（訓練頻率為主，日常活動量高者可上調一桶）
+2. 依「BMR / TDEE 計算」段呼叫 `bmr-tdee.py --pal <pal>` 算 BMR/TDEE（唯讀預覽）
 
 ### 確認 + 回填
 
@@ -65,19 +68,21 @@ description: Estimates calories and macros for food (Taiwanese cuisine, restaura
 - M/30/175｜70 kg｜體脂 18%
 - BMR 1700｜TDEE 2635（PAL 1.55）
 - 目標：減脂
-- 訓練日：熱量 2240｜P 140｜C 250｜F 70
-- 休息日：熱量 1990｜P 140｜C 180｜F 75
 - NG 上限：3 次/週
 
-回覆「確認」即寫入本檔（spec）。
+回覆「確認」即寫入 spec 並建立第一筆體重紀錄（訓練日/休息日目標由 diet-targets.py 推導後回報）。
 ```
 
-使用者回「確認」後，用 Edit 工具把本檔（spec）：
+使用者回「確認」後：
 
-1. 「使用者背景」段所有 `<your_*>` placeholder 取代成實際值
-2. 「NG 食物管理」段兩處 `<your_threshold>` 取代成 NG 上限數字
-
-回報「已建立，往後傳食物或描述就直接記錄」。
+1. 用 Edit 工具把本檔（spec）：「使用者背景」段所有 `<your_*>` placeholder 取代成實際值；「NG 食物管理」段兩處 `<your_threshold>` 取代成 NG 上限數字
+2. Seed 第一筆體重紀錄——**必須帶 `--pal <onboarding_pal>`**（此時 diet_log 還是空的，不帶會被自動推成 1.20，TDEE 大幅低估）：
+   ```sh
+   ~/diet-coach/scripts/weight-log-append.py --dir ~/diet-coach \
+     --weight <kg> [--body-fat-pct <pct>] [--height-cm <cm> --age <yr> --gender female|male] \
+     --pal <onboarding_pal> --notes "onboarding"
+   ```
+3. 跑 `diet-targets.py --dir ~/diet-coach --goal <goal>` 推導訓練日/休息日目標，連同「已建立，往後傳食物或描述就直接記錄」一起回報。
 
 回「不對」或要改的項目：修正後重新確認。
 
@@ -295,7 +300,7 @@ python3 ~/diet-coach/scripts/food-ref-append.py \
    ~/diet-coach/scripts/pal-from-log.py --csv <path-to-diet_log.csv>
    ```
    - 輸出建議 PAL（從 1.20 / 1.375 / 1.55 / 1.725 / 1.90 五桶取一）
-   - 視窗內 < 3 個記錄日 → 印 sparse 警告，建議維持當前 PAL
+   - 視窗內 < 3 個記錄日 → 印 sparse 警告，維持當前 PAL（取 `weight_log.csv` 最後一筆的 `pal`；寫入時用 `--pal` 帶入，見「確認後動作」）
 2. 呼叫 helper 算 BMR/TDEE：
    ```sh
    ~/diet-coach/scripts/bmr-tdee.py --weight <kg> --height <cm> --age <yr> \
@@ -322,9 +327,11 @@ BMR：XXX kcal｜TDEE：XXX kcal｜PAL：X.XXX
 1. 呼叫 helper 寫入（自動重算 PAL ＋ BMR/TDEE、原子 append 8 欄列到 `weight_log.csv`，**絕不**手動 Edit）：
    ```sh
    ~/diet-coach/scripts/weight-log-append.py --dir ~/diet-coach \
-     --weight <kg> [--body-fat-pct <pct>] [--height-cm <cm> --age <yr> --gender female|male] [--notes "..."]
+     --weight <kg> [--body-fat-pct <pct>] [--height-cm <cm> --age <yr> --gender female|male] \
+     [--pal <pal>] [--notes "..."]
    ```
    有體脂走 Katch-McArdle（免年齡性別）；無體脂才需 height/age/gender。
+   `--pal` 只在 step 1 印 sparse 警告時帶（維持當前 PAL）；資料足夠時**省略**，讓腳本自動從 diet_log 推。
 2. 跑 `diet-targets.py --dir ~/diet-coach --goal <goal>` 確認推導後的新目標，回報使用者。
 3. (optional) `git add weight_log.csv` → commit → push。目標是推導的，本檔無數字可改。
 
