@@ -36,7 +36,7 @@ def main():
     rows = []
     training_day = None
     try:
-        f = open(args.csv, newline="")
+        f = open(args.csv, newline="", encoding="utf-8-sig")
     except FileNotFoundError:
         print(f"error: diet_log.csv not found at {args.csv}", file=sys.stderr)
         print("hint: pass --csv <path> or run from the directory containing diet_log.csv",
