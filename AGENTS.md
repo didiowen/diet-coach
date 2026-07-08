@@ -261,7 +261,23 @@ python3 scripts/backfill-food-ref-minerals.py --apply    # 寫入
 
 ### 優先順序
 1. 有 reference 值 → 直接採用，標註來源
-2. 無 reference → 依估算原則推算，標註誤差
+2. 有條碼、或為國際/連鎖包裝食品 → 查 Open Food Facts（見下）
+3. 無 reference → 依估算原則推算，標註誤差
+
+### Open Food Facts 查詢
+
+Open Food Facts 是全球開放食品資料庫，適合查國際/進口包裝食品（本土在地小吃、
+自助餐等仍需估算）。同樣自動寫入 `food_reference.csv`：
+
+```sh
+python3 scripts/openfoodfacts-lookup.py <條碼>              # 條碼直查並寫入
+python3 scripts/openfoodfacts-lookup.py --search "<關鍵字>"  # 關鍵字搜尋並寫入
+python3 scripts/openfoodfacts-lookup.py <條碼> --list-only  # 只顯示不寫入
+```
+
+注意：資料由社群自行填寫，偶有錯誤，寫入前先看終端機印出的數值是否合理。多數
+商品沒有標準份量資料，會退回每 100g（`notes` 會標明），換算成實際攝取量是使
+用時的責任，不是這支腳本的。
 
 ### 不需確認直接存入
 

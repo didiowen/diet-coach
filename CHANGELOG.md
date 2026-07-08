@@ -1,5 +1,14 @@
 # Changelog
 
+## [v1.2.0] — 2026-07-08
+
+### 🌍 Open Food Facts 查詢
+
+- 新增 `scripts/openfoodfacts-lookup.py`：條碼直查或關鍵字搜尋 Open Food Facts（全球開放食品資料庫），自動寫入 `food_reference.csv`（沿用 `food-ref-append.py` 的 flock＋dedupe）。適合國際/連鎖進口包裝食品，補足本土 FamilyMart 查詢覆蓋不到的品項。
+- 關鍵字搜尋改走新版 `search.openfoodfacts.org` API——舊版 `cgi/search.pl` 目前回傳 "Page temporarily unavailable"。
+- 優先採用商品的 per-serving 營養素；缺項時退回 per-100g 並於 `notes` 標明（需自行換算實際攝取量）。熱量欄位缺 kcal 時自動用 kJ 換算（÷4.184）。
+- `AGENTS.md`「優先順序」新增 Open Food Facts 步驟。
+
 ## [v1.1.0] — 2026-07-02
 
 ### 🧪 全新安裝模擬修正（fresh-install simulation fixes）

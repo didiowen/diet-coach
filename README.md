@@ -49,6 +49,7 @@
 | `scripts/diet-targets.py` | 從最新 `weight_log.csv` 依 goal（cut/maintain/recomp/bulk）推導訓練日/休息日熱量與 P/C/F 目標（spec 的目標一律由此推導，不手算） |
 | `scripts/backfill-food-ref-minerals.py` | 從台灣食藥署營養成分資料庫回填 `food_reference.csv` 的 `calcium_mg`/`iron_mg`（預設 dry-run，`--apply` 才寫入） |
 | `scripts/familymart-lookup.py` | 全家食安 API 查商品營養標示並寫入 `food_reference.csv` |
+| `scripts/openfoodfacts-lookup.py` | 查 Open Food Facts（全球開放食品資料庫）條碼或關鍵字，寫入 `food_reference.csv`，適合國際/連鎖進口包裝食品 |
 | `group/` | 多人問責群組模板：`CLAUDE.md`、`members.example.json`、`AGENTS.md`、`WELCOME.md`（見[多人問責群組模式](#多人問責群組模式group-accountability)） |
 
 ## CSV 欄位
