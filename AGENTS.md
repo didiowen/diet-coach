@@ -160,10 +160,16 @@ description: Estimates calories and macros for food (Taiwanese cuisine, restaura
 ## 估算流程
 
 ### 1. 啟動時讀取當日紀錄（強制）
-每次 session 啟動或收到新食物訊息時，先 grep 當天日期的 diet_log.csv 條目：
+每次 session 啟動或收到新食物訊息時，**第一步**先執行 Bash 取得系統時間確認今日日期：
 
 ```sh
-grep "^$(date +%Y-%m-%d)" ~/diet-coach/diet_log.csv
+date +%Y-%m-%d
+```
+
+取得日期後（變數記為 `TODAY`），再 grep 當日 diet_log.csv 條目：
+
+```sh
+grep "^TODAY" ~/diet-coach/diet_log.csv
 ```
 
 #### 若當天已有entry

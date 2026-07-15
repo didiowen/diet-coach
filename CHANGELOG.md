@@ -1,5 +1,9 @@
 # Changelog
 
+## [v1.2.1] — 2026-07-16
+
+- `AGENTS.md`：收到訊息的第一步改為先執行 `date +%Y-%m-%d` 確認系統日期，再 grep diet_log，避免跨午夜或時區差異時用錯日期。
+
 ## [v1.2.0] — 2026-07-08
 
 ### 🌍 Open Food Facts 查詢
